@@ -3,483 +3,559 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fazbear Admin - Registro Elettronico</title>
+    <title>Fazbear Classroom - Sistema Gestionale</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle, #2d1b14 0%, #f4f4f2 100%); background-attachment: fixed; color: #1a1a1a; }
-        .glass { background: rgba(45, 27, 20, 0.9); border: 2px solid #d4af37 ; backdrop-filter: blur(10px) ;box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6); border-radius: 15px;  }
-        .tab-content { display: none; }
-        .active-tab { display: block; animation: fadeIn 0.2s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f4f4f2; color: #1a1a1a; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .glass { background: rgba(45, 27, 20, 0.95); border: 1px solid #d4af37; backdrop-filter: blur(10px); border-radius: 12px; color: white; }
+        .sidebar-item { transition: all 0.2s; border-radius: 8px; margin-bottom: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; cursor: pointer; }
+        .sidebar-item.active { background: #b91c1c; color: white; }
+        .tab-content { display: none; height: 100%; }
+        .active-view { display: flex; animation: fadeIn 0.3s ease-out; flex-direction: column; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden">
+<body>
 
-    <header class="h-16 border-b border-zinc-800 bg-[#f4f4f2] flex items-center justify-between px-6 z-50 shrink-0">
+    <!-- Top Bar -->
+    <header class="h-14 border-b border-zinc-300 bg-white flex items-center justify-between px-6 z-50 shrink-0 shadow-sm">
         <div class="flex items-center gap-4">
-            <div class="w-10 h-10 bg-red-700 rounded-lg flex items-center justify-center shadow-lg text-xl">🐻</div>
-            <h1 class="font-black text-sm uppercase italic text-zinc-900">Fazbear <span class="text-red-600">Classroom</span></h1>
-        </div>
-        <div class="flex items-center gap-4">
-            <div id="user-profile" class="hidden flex items-center gap-3 bg-zinc-200/50 p-1.5 rounded-full border border-zinc-800">
-                <img id="user-avatar" src="" class="w-7 h-7 rounded-full border border-red-600">
-                <span id="user-name" class="text-[10px] font-bold text-zinc-900 pr-2 uppercase">---</span>
+            <div class="w-8 h-8 bg-red-700 rounded flex items-center justify-center text-lg">🐻</div>
+            <div>
+                <h1 class="font-black text-xs uppercase italic tracking-tighter">Fazbear <span class="text-red-600">Classroom</span></h1>
+                <p id="current-academic-year" class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">A.S. --/--</p>
             </div>
-            <button id="login-btn" onclick="window.loginDiscord()" class="bg-red-700 text-white text-[9px] font-black px-4 py-2 rounded-lg uppercase shadow-lg hover:bg-red-600 transition-all">Login Discord</button>
+        </div>
+        
+        <div class="flex items-center gap-6">
+            <div id="notif-bell" class="relative cursor-pointer hidden">
+                <span class="text-xl">🔔</span>
+                <span id="notif-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-[8px] px-1 rounded-full font-black">0</span>
+            </div>
+
+            <div class="flex flex-col items-end">
+                <input type="date" id="global-calendar" onchange="window.updateDateContext()" class="bg-zinc-100 border border-zinc-300 rounded px-2 py-0.5 text-[10px] font-bold outline-none focus:border-red-600">
+                <span id="period-indicator" class="text-[8px] font-black uppercase text-red-600">1° Quadrimestre</span>
+            </div>
+
+            <div id="user-profile" class="hidden flex items-center gap-3 bg-zinc-100 p-1 rounded-full border border-zinc-200">
+                <img id="user-avatar" src="" class="w-6 h-6 rounded-full border border-red-600">
+                <div class="flex flex-col pr-2">
+                    <span id="user-name" class="text-[9px] font-black text-zinc-800 uppercase leading-none">---</span>
+                    <span id="user-role-label" class="text-[7px] font-bold text-red-600 uppercase tracking-tighter">Ospite</span>
+                </div>
+            </div>
+            <button id="login-btn" onclick="window.loginDiscord()" class="bg-zinc-900 text-white text-[9px] font-black px-4 py-2 rounded uppercase hover:bg-red-700 transition-all">Login Discord</button>
         </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden">
-        <aside class="w-72 border-r border-zinc-300 bg-transparent flex flex-col shrink-0">
-            <div class="p-4 border-b border-zinc-200">
-                <input type="text" id="sidebar-search" oninput="window.searchSidebar()" placeholder="Cerca profilo..." class="w-full bg-zinc-200 border border-zinc-300 rounded-xl px-4 py-2 text-xs text-black outline-none focus:border-red-700 transition-all">
-            </div>
-            <div id="entity-list" class="flex-1 overflow-y-auto custom-scroll p-4 space-y-6">
-                <p class="text-[9px] text-zinc-600 uppercase font-black animate-pulse text-center">Inizializzazione database...</p>
+        <!-- Sidebar -->
+        <aside id="main-sidebar" class="w-64 border-r border-zinc-200 bg-zinc-50 flex flex-col shrink-0 p-4">
+            <nav class="space-y-1 mb-8">
+                <p class="text-[9px] font-black text-zinc-400 uppercase mb-2 ml-2">Menu Principale</p>
+                <button onclick="window.changeMenu('agenda')" id="menu-agenda" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-200 active">
+                    <span>📅</span> Agenda
+                </button>
+                <button onclick="window.changeMenu('registro')" id="menu-registro" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-200">
+                    <span>📝</span> Registro Voti
+                </button>
+                <button onclick="window.changeMenu('note')" id="menu-note" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-200">
+                    <span>⚠️</span> Note e Mandati
+                </button>
+                <button onclick="window.changeMenu('bacheca')" id="menu-bacheca" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-200">
+                    <span>📢</span> Bacheca
+                </button>
+            </nav>
+
+            <div id="selection-area" class="flex-1 overflow-y-auto custom-scroll">
+                <div id="class-selection-container">
+                    <p class="text-[9px] font-black text-zinc-400 uppercase mb-2 ml-2">Selezione Classe</p>
+                    <select id="class-selector" onchange="window.handleClassChange()" class="w-full bg-white border border-zinc-300 rounded-lg p-2 text-xs font-bold mb-4 outline-none focus:border-red-600">
+                        <option value="">Seleziona Classe...</option>
+                        <option value="A">Classe A</option>
+                        <option value="B">Classe B</option>
+                        <option value="C">Classe C</option>
+                    </select>
+                </div>
+
+                <div id="student-list-container" class="hidden">
+                    <p class="text-[9px] font-black text-zinc-400 uppercase mb-2 ml-2">Studenti</p>
+                    <div id="student-list" class="space-y-1"></div>
+                </div>
             </div>
         </aside>
 
-        <main class="flex-1 overflow-y-auto bg-transparent p-6 custom-scroll relative">
-            <div id="empty-view" class="h-full flex items-center justify-center opacity-40 uppercase font-black text-xs tracking-widest text-center">
-                Seleziona un'entità dal database<br>per visualizzare i record
-            </div>
-
-            <div id="main-view" class="hidden max-w-4xl mx-auto space-y-6">
-                <div class="glass p-8 rounded-[2rem] border-l-4 border-red-700 relative overflow-hidden">
-                    <div id="bg-initial" class="absolute right-0 top-0 p-4 text-[10rem] font-black text-white/[0.02] pointer-events-none italic select-none">?</div>
-                    <div class="relative z-10">
-                        <span id="tag-role" class="px-2 py-1 bg-red-700 text-[9px] font-black uppercase rounded text-white shadow-sm">---</span>
-                        <h2 id="display-name" class="text-5xl font-extrabold text-[#fef3c7] mt-2 italic uppercase leading-none tracking-tighter">---</h2>
-                        <div id="stats-bar" class="mt-4 flex gap-4">
-                            <div class="bg-zinc-900/50 p-2 px-4 rounded-lg border border-zinc-800">
-                                <p class="text-[8px] uppercase font-bold text-[#d4af37]">Media Rendimento</p>
-                                <p id="media-val" class="text-lg font-black text-red-500">0.0</p>
-                            </div>
+        <!-- Contenuto -->
+        <main class="flex-1 overflow-hidden bg-zinc-100 p-6 relative">
+            
+            <!-- VIEW: AGENDA -->
+            <div id="view-agenda" class="tab-content active-view space-y-4">
+                <div class="flex justify-between items-end">
+                    <h2 class="text-2xl font-black uppercase italic text-zinc-800">Agenda <span id="agenda-class-title">---</span></h2>
+                    <div id="prof-actions-agenda" class="hidden flex gap-2">
+                        <button onclick="window.openModal('firme')" class="bg-red-700 text-white text-[9px] font-bold px-3 py-2 rounded uppercase">Firma Ora</button>
+                        <button onclick="window.openModal('compiti')" class="bg-blue-600 text-white text-[9px] font-bold px-3 py-2 rounded uppercase">Assegna Compiti</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-4 h-full">
+                    <div class="col-span-2 space-y-4 overflow-y-auto custom-scroll pr-2">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-zinc-200">
+                            <h3 class="text-[10px] font-black uppercase text-zinc-400 mb-3 tracking-widest">Firme e Lezioni</h3>
+                            <div id="agenda-firme-list" class="space-y-2 text-sm italic text-zinc-600"></div>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-zinc-200">
+                            <h3 class="text-[10px] font-black uppercase text-zinc-400 mb-3 tracking-widest">Compiti di Classe</h3>
+                            <div id="agenda-compiti-list" class="space-y-2"></div>
                         </div>
                     </div>
-                </div>
-
-                <div id="tabs-nav" class="flex gap-1 bg-zinc-900/80 p-1 rounded-xl border border-zinc-800 w-fit">
-                    <button onclick="window.showTab('voti')" id="btn-voti" class="px-5 py-2 text-[9px] font-black uppercase rounded-lg transition-all">Voti</button>
-                    <button onclick="window.showTab('note')" id="btn-note" class="px-5 py-2 text-[9px] font-black uppercase rounded-lg transition-all">Note e Compiti</button>
-                    <button onclick="window.showTab('pagella')" id="btn-pagella" class="px-5 py-2 text-[9px] font-black uppercase rounded-lg transition-all">Pagella</button>
-                </div>
-
-                <div id="admin-panel" class="hidden glass p-6 rounded-2xl border border-red-900/30 bg-red-900/5">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 id="admin-title" class="text-[10px] font-black uppercase text-red-500 italic">Accesso Autorizzato</h3>
-                        <input id="input-data-custom" type="date" class="bg-zinc-900 border border-zinc-800 rounded-lg p-1.5 text-[10px] text-white outline-none focus:border-red-700">
-                    </div>
-                    <div class="grid gap-4">
-    <div class="flex gap-2">
-        <input id="input-voto" type="number" step="0.5" placeholder="Voto" class="bg-zinc-900 border border-zinc-800 rounded-lg p-2.5 text-xs w-20 text-white outline-none focus:border-red-700">
-        
-        <select id="input-materia" class="bg-zinc-900 border border-zinc-800 rounded-lg p-2.5 text-xs flex-1 text-white outline-none focus:border-red-700 appearance-none cursor-pointer">
-            <option value="" disabled selected>Materia</option>
-            <option value="matematica">Matematica</option>
-            <option value="fisica">Fisica</option>
-            <option value="scienze">Scienze</option>
-            <option value="arte">Arte</option>
-            <option value="musica">Musica</option>
-            <option value="inglese">Inglese</option>
-            <option value="francese">Francese</option>
-            <option value="spagnolo">Spagnolo</option>
-            <option value="ginnastica">Ginnastica</option>
-            <option value="geostoria">Geostoria</option>
-            <option value="storia">Storia</option>
-            <option value="filosofia">Filosofia</option>
-            <option value="italiano">Italiano</option>
-            <option value="latino">Latino</option>
-            <option value="religione">Religione</option>
-            <option value="magia">Magia</option>
-            <option value="cinese">Cinese</option>
-            <option value="tedesco">Tedesco</option>
-            <option value="sport">Sport</option>
-        </select>
-
-        <button onclick="window.addEntry('voti')" class="bg-red-700 text-white text-[9px] font-black px-4 py-2 rounded-lg uppercase shadow-lg hover:bg-red-600 transition-all">Registra</button>
-    </div>
-
-    <div class="flex gap-2">
-        <input id="input-nota" type="text" placeholder="Scrivi una nota ufficiale..." class="bg-zinc-900 border border-zinc-800 rounded-lg p-2.5 text-xs flex-1 text-white outline-none focus:border-red-700">
-        <button onclick="window.addEntry('note')" class="bg-amber-600 text-white text-[9px] font-black px-4 py-2 rounded-lg uppercase shadow-lg hover:bg-amber-500 transition-all">Invia Nota</button>
-    </div>
-
-    <div class="flex gap-2 mt-2">
-        <input id="input-compito-testo" type="text" placeholder="Assegna un compito..." class="bg-zinc-900 border border-zinc-800 rounded-lg p-2.5 text-xs flex-1 text-white outline-none focus:border-red-700">
-        
-        <select id="input-compito-materia" class="bg-zinc-900 border border-zinc-800 rounded-lg p-2.5 text-xs w-32 text-white outline-none focus:border-red-700 appearance-none cursor-pointer">
-            <option value="" disabled selected>Materia</option>
-            <option value="matematica">Matematica</option>
-            <option value="fisica">Fisica</option>
-            <option value="scienze">Scienze</option>
-            <option value="arte">Arte</option>
-            <option value="musica">Musica</option>
-            <option value="inglese">Inglese</option>
-            <option value="francese">Francese</option>
-            <option value="spagnolo">Spagnolo</option>
-            <option value="ginnastica">Ginnastica</option>
-            <option value="geostoria">Geostoria</option>
-            <option value="storia">Storia</option>
-            <option value="filosofia">Filosofia</option>
-            <option value="italiano">Italiano</option>
-            <option value="latino">Latino</option>
-            <option value="religione">Religione</option>
-            <option value="magia">Magia</option>
-            <option value="cinese">Cinese</option>
-            <option value="tedesco">Tedesco</option>
-            <option value="sport">Sport</option>
-        </select>
-        <button onclick="window.addEntry('compiti')" class="bg-blue-700 text-white text-[9px] font-black px-4 py-2 rounded-lg uppercase shadow-lg hover:bg-blue-600 transition-all">Assegna</button>
-    </div>
-</div>
-                </div>
-
-                <div id="content-area">
-                    <div id="tab-voti" class="tab-content active-tab">
-                        <div class="glass rounded-xl overflow-hidden border border-zinc-800">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-zinc-900/50 text-[9px] uppercase font-black text-zinc-500 border-b border-zinc-800">
-                                    <tr>
-                                        <th class="p-4">Materia</th>
-                                        <th class="p-4">Data</th>
-                                        <th class="p-4 text-right">Voto</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="voti-body" class="divide-y divide-zinc-800/50"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div id="tab-note" class="tab-content">
-                        <h4 class="text-[10px] font-black uppercase text-zinc-400 mb-4 tracking-widest">Note Disciplinari e Compiti</h4>
-                        <div id="note-container" class="grid gap-3"></div>
-                    </div>
-                    <div id="tab-pagella" class="tab-content">
-                        <div id="pagella-view" class="glass p-12 rounded-[3rem] text-center border border-zinc-800">
-                            <p class="text-[10px] font-black uppercase text-zinc-500 mb-4">Documento di Valutazione</p>
-                            <div id="pagella-content"></div>
+                    <div class="space-y-4">
+                        <div class="bg-red-50 rounded-xl p-4 border border-red-100">
+                            <h3 class="text-[10px] font-black uppercase text-red-800 mb-3 tracking-widest">Note e Voti Odierni</h3>
+                            <div id="agenda-daily-info" class="space-y-2 text-[11px]"></div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- VIEW: REGISTRO -->
+            <div id="view-registro" class="tab-content space-y-6">
+                <div id="student-header" class="hidden glass p-6 rounded-2xl">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span id="res-student-role" class="bg-red-600 text-[8px] px-2 py-0.5 rounded font-black uppercase">Studente</span>
+                            <h2 id="res-student-name" class="text-3xl font-black uppercase italic text-amber-200">Dati Studente</h2>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[9px] uppercase font-bold text-zinc-400">Media Globale</p>
+                            <p id="res-student-media" class="text-3xl font-black text-red-500">0.0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="prof-grade-panel" class="hidden glass p-4 flex gap-3 items-center">
+                    <input id="input-grade-val" type="number" step="0.5" placeholder="Voto" class="w-16 bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white">
+                    <select id="input-grade-subject" class="bg-zinc-900 border border-zinc-700 rounded p-2 text-xs flex-1 text-white"></select>
+                    <button onclick="window.submitGrade()" class="bg-red-700 px-4 py-2 rounded text-[10px] font-black uppercase">Vota</button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-black uppercase">
+                            <tr>
+                                <th class="p-4">Materia</th>
+                                <th class="p-4">1° Quadrimestre</th>
+                                <th class="p-4">2° Quadrimestre</th>
+                                <th class="p-4 text-right">Media</th>
+                            </tr>
+                        </thead>
+                        <tbody id="registro-voti-body" class="divide-y divide-zinc-100"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW: NOTE -->
+            <div id="view-note" class="tab-content space-y-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-black uppercase italic text-zinc-800">Note e Mandati</h2>
+                    <button id="btn-add-note" onclick="window.openModal('note')" class="hidden bg-amber-600 text-white text-[9px] font-bold px-4 py-2 rounded uppercase">Emetti Nota/Mandato</button>
+                </div>
+                <div id="notes-list-global" class="grid gap-3 overflow-y-auto custom-scroll"></div>
+            </div>
+
+            <!-- VIEW: BACHECA -->
+            <div id="view-bacheca" class="tab-content space-y-4">
+                <h2 class="text-2xl font-black uppercase italic text-zinc-800">Bacheca</h2>
+                <div id="bacheca-admin-panel" class="hidden glass p-4 flex gap-2">
+                    <input id="input-bacheca-text" type="text" placeholder="Scrivi comunicazione..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white">
+                    <button onclick="window.addBacheca()" class="bg-zinc-100 text-black px-4 py-2 rounded text-[10px] font-black uppercase">Pubblica</button>
+                </div>
+                <div id="bacheca-container" class="space-y-3 overflow-y-auto"></div>
+            </div>
+
+            <!-- MODAL -->
+            <div id="modal-overlay" class="fixed inset-0 bg-black/80 z-[100] hidden items-center justify-center p-4">
+                <div class="glass max-w-md w-full p-8 space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h3 id="modal-title" class="text-xl font-black uppercase italic text-red-500">Azione</h3>
+                        <button onclick="window.closeModal()" class="text-zinc-500 hover:text-white">✕</button>
+                    </div>
+                    <div id="modal-body" class="space-y-4 text-white"></div>
+                    <button id="modal-confirm" class="w-full bg-red-700 py-3 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg">Conferma</button>
+                </div>
+            </div>
+
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, onSnapshot, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, onSnapshot, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyCDlju6uXmXj3fRLYge-ya65J8ditM6rnM", 
             authDomain: "fnaf-school-bot.firebaseapp.com", 
             projectId: "fnaf-school-bot", 
-            storageBucket: "fnaf-school-bot.firebasestorage.app", 
             appId: "1:862125328005:web:463c6fb776a0f7e1e24bec" 
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const APP_ID = 'fnaf-school-bot';
 
-        window.currentUserId = null;
+        // --- STATO ---
+        window.userRole = 'ospite'; 
         window.currentUserData = null;
-        window.selectedEntityId = null;
+        window.selectedClass = null;
+        window.selectedStudentId = null;
+        window.allStudents = [];
 
-        window.loginDiscord = () => {
-            const uri = encodeURIComponent(window.location.origin + window.location.pathname);
-            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=1469524509106110484&redirect_uri=${uri}&response_type=token&scope=identify`;
+        // --- DATE & ACADEMIC YEAR ---
+        const inputCal = document.getElementById('global-calendar');
+        inputCal.value = new Date().toISOString().split('T')[0];
+
+        window.updateDateContext = () => {
+            const date = new Date(inputCal.value);
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+            const ay = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+            document.getElementById('current-academic-year').innerText = `A.S. ${ay}`;
+            document.getElementById('period-indicator').innerText = (month >= 9 || month <= 1) ? "1° Quadrimestre" : "2° Quadrimestre";
+            if(window.selectedClass) window.handleClassChange();
+        };
+        window.updateDateContext();
+
+        // --- PERMESSI ---
+        const ROLES = {
+            PRESIDE: 'preside',
+            PROF: 'prof',
+            BIDELLO: 'bidello',
+            STUDENTE: 'studente',
+            OSPITE: 'ospite'
         };
 
-        signInAnonymously(auth).then(() => {
-            onSnapshot(collection(db, 'artifacts', 'fnaf-school-bot', 'public', 'data', 'assignments'), (snap) => {
-                const list = document.getElementById('entity-list');
-                const groups = { 'Personale Scolastico': [] };
-                snap.forEach(d => {
-                    const s = d.data();
-                    const key = s.classe && s.classe !== "None" ? `Classe ${s.classe}` : 'Personale Scolastico';
-                    if(!groups[key]) groups[key] = [];
-                    groups[key].push({id: d.id, ...s});
-                });
+        function getRoleType(roleStr) {
+            if(!roleStr) return ROLES.OSPITE;
+            const r = roleStr.toLowerCase();
+            if(r.includes('preside')) return ROLES.PRESIDE;
+            if(r.includes('prof') || r.includes('docente')) return ROLES.PROF;
+            if(r.includes('bidello') || r.includes('ata')) return ROLES.BIDELLO;
+            if(r.includes('studente')) return ROLES.STUDENTE;
+            return ROLES.OSPITE;
+        }
 
-                list.innerHTML = Object.keys(groups).sort().map(g => `
-                    <div class="sidebar-group">
-                        <h3 class="text-[10px] font-black uppercase text-zinc-800 mb-2 tracking-widest border-b border-zinc-300 pb-1">${g}</h3>
-                        ${groups[g].map(s => `
-                            <button onclick="window.loadData('${s.id}', ${JSON.stringify(s).replace(/"/g, '&quot;')})" 
-                                    class="w-full text-left p-2.5 rounded-xl hover:bg-zinc-200 transition-all text-xs text-black mb-1 border border-transparent hover:border-zinc-300 flex items-center justify-between group">
-                                <span class="font-bold">${s.name}</span> 
-                                <span class="text-[8px] text-zinc-500 uppercase">${s.role}</span>
-                            </button>`).join('')}
-                    </div>
-                `).join('');
+        // --- FIREBASE SYNC ---
+        signInAnonymously(auth).then(() => {
+            onSnapshot(collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments'), (snap) => {
+                window.allStudents = [];
+                snap.forEach(d => window.allStudents.push({id: d.id, ...d.data()}));
+                if(window.selectedClass) renderStudentList();
             });
             checkAuth();
         });
 
-        window.loadData = (id, s) => {
-            window.selectedEntityId = id;
-            document.getElementById('empty-view').classList.add('hidden');
-            document.getElementById('main-view').classList.remove('hidden');
-            document.getElementById('display-name').innerText = s.name;
-            document.getElementById('tag-role').innerText = s.role;
-            document.getElementById('bg-initial').innerText = s.name[0];
-
-            const roleStr = s.role.toLowerCase();
-            const isStaffProfile = roleStr.includes('prof') || roleStr.includes('preside') || roleStr.includes('bidello') || roleStr.includes('docente');
+        // --- GESTIONE INTERFACCIA RUOLI ---
+        function applyRoleUI() {
+            const type = window.userRole;
+            document.getElementById('user-role-label').innerText = window.currentUserData?.role || 'Ospite';
             
-            document.getElementById('stats-bar').style.display = isStaffProfile ? 'none' : 'flex';
-            document.getElementById('btn-voti').style.display = isStaffProfile ? 'none' : 'block';
-            document.getElementById('btn-pagella').style.display = isStaffProfile ? 'none' : 'block';
+            // Logica visibilità per ruolo
+            const isStaff = type === ROLES.PRESIDE || type === ROLES.PROF;
+            const isPreside = type === ROLES.PRESIDE;
+            const isBidello = type === ROLES.BIDELLO;
+            const isStudente = type === ROLES.STUDENTE;
+
+            if(isStaff) {
+                document.getElementById('prof-actions-agenda').classList.remove('hidden');
+                document.getElementById('prof-grade-panel').classList.remove('hidden');
+                document.getElementById('btn-add-note').classList.remove('hidden');
+            }
+            if(isPreside || isBidello) {
+                document.getElementById('bacheca-admin-panel').classList.remove('hidden');
+            }
+            if(isStaff || isBidello || type === ROLES.OSPITE) {
+                document.getElementById('class-selection-container').classList.remove('hidden');
+            }
+
+            // Se è studente, forza la sua classe e il suo profilo
+            if(isStudente) {
+                window.selectedClass = window.currentUserData.classe;
+                window.selectedStudentId = window.currentUserId;
+                document.getElementById('class-selector').value = window.selectedClass;
+                document.getElementById('class-selector').disabled = true;
+                document.getElementById('student-list-container').classList.add('hidden');
+                window.handleClassChange();
+                window.selectStudent(window.currentUserId);
+            }
             
-            window.showTab(isStaffProfile ? 'note' : 'voti');
+            // Notifiche (solo Prof e Preside)
+            if(isStaff) {
+                document.getElementById('notif-bell').classList.remove('hidden');
+                listenNotifications();
+            }
+        }
 
-            onSnapshot(doc(db, 'artifacts', 'fnaf-school-bot', 'public', 'data', 'records', id), d => {
-                const data = d.exists() ? d.data() : {};
-                const vList = data.voti || data.grades || [];
-                let sum = 0; 
-                vList.forEach(v => sum += parseFloat(v.voto || v.value || 0));
-                const media = vList.length > 0 ? (sum / vList.length).toFixed(1) : "0.0";
-                
-                document.getElementById('media-val').innerText = media;
-                
-                document.getElementById('voti-body').innerHTML = vList.map((v, index) => `
-                    <tr class="group hover:bg-white/[0.02]">
-                        <td class="p-4 font-bold text-[#fef3c7] uppercase text-[10px] tracking-tight">${v.materia || v.subject}</span>
-                        <span class="text-[7px] text-zinc-500 uppercase font-black mt-1 italic">Firma: ${v.teacher || "Docente Ignoto"}
-                        </div>
-                    </td>
-                        <td class="p-4 text-[9px] text-[#fef3c7]/60">${v.data || v.date || '---'}</td>
-                        <td class="p-4 font-black text-right ${ (v.voto || v.value) >= 6 ? 'text-green-500' : 'text-red-500' }">
-                            <div class="flex items-center justify-end gap-3">
-                                <span>${v.voto || v.value}</span>
-                                ${(window.currentUserData && (window.currentUserData.role.toLowerCase().includes('prof') || window.currentUserData.role.toLowerCase().includes('preside') || window.currentUserData.role.toLowerCase().includes('direttore') || window.currentUserData.role.toLowerCase().includes('vice'))) ? `
-                                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                                        <button onclick="window.editEntry('voti', ${index})" class="text-blue-500 text-[8px] font-black uppercase">Modifica</button>
-                                        <button onclick="window.deleteEntry('voti', ${index})" class="text-red-900 hover:text-red-500 text-[8px] font-black uppercase">Elimina</button>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        </td>
-                    </tr>
-                `).join('') || '<tr><td colspan="3" class="p-10 text-center text-black opacity-100 text-[10px] uppercase font-black tracking-widest">Nessun record</td></tr>';
-                
-                // RENDER NOTE E COMPITI INSIEME
-                const noteHtml = (data.notes || data.note || []).map((n, index) => `
-                    <div class="group p-4 glass rounded-xl border-l-4 border-amber-600 bg-amber-600/5 text-xs italic">
-                        <div class="flex justify-between items-start">
-                            <span>"${n.text || n.testo}"</span>
-                            ${(window.currentUserData && (window.currentUserData.role.toLowerCase().includes('prof') || window.currentUserData.role.toLowerCase().includes('preside') || window.currentUserData.role.toLowerCase().includes('direttore') || window.currentUserData.role.toLowerCase().includes('vice'))) ? 
-                            `<button onclick="window.deleteEntry('note', ${index})" class="opacity-0 group-hover:opacity-100 text-red-800 hover:text-red-500 text-[8px] font-black uppercase">Elimina</button>` : ''}
-                        </div>
-                        <div class="mt-2 text-[8px] opacity-40 uppercase font-black tracking-widest">${n.date || n.data} — Emesso da: ${n.teacher || n.autore}</div>
-                    </div>`).join('');
-
-                const compitiHtml = (data.compiti || []).map((c, index) => `
-                    <div class="group p-4 glass rounded-xl border-l-4 border-blue-600 bg-blue-600/5 text-xs">
-                        <div class="flex justify-between items-start">
-                            <div class="flex flex-col">
-                                <span class="text-blue-400 font-black uppercase text-[8px] tracking-widest mb-1">${c.materia}</span>
-                                <span class="text-zinc-200">${c.testo}</span>
-                            </div>
-                            ${(window.currentUserData && (window.currentUserData.role.toLowerCase().includes('prof') || window.currentUserData.role.toLowerCase().includes('preside') || window.currentUserData.role.toLowerCase().includes('direttore') || window.currentUserData.role.toLowerCase().includes('vice'))) ? 
-                            `<button onclick="window.deleteEntry('compiti', ${index})" class="opacity-0 group-hover:opacity-100 text-red-800 hover:text-red-500 text-[8px] font-black uppercase">Elimina</button>` : ''}
-                        </div>
-                        <div class="mt-2 text-[8px] opacity-40 uppercase font-black tracking-widest">${c.data} — Assegnato da: ${c.autore}</div>
-                    </div>`).join('');
-
-                document.getElementById('note-container').innerHTML = (noteHtml + compitiHtml) || '<p class="text-center opacity-30 text-[10px] uppercase font-black py-10 tracking-[0.2em]">Nessun record</p>';
-                
-                document.getElementById('pagella-content').innerHTML = `<h4 class="text-7xl font-black ${media >= 6 ? 'text-green-600' : 'text-red-600'} italic tracking-tighter">${media}</h4><div class="mt-4 px-4 py-1 inline-block rounded-full bg-zinc-900 border border-zinc-800 text-[10px] font-black uppercase text-white">${media >= 6 ? 'Promosso' : 'Debito'}</div>`;
-            });
+        // --- GESTIONE CLASSI E STUDENTI ---
+        window.handleClassChange = () => {
+            const cls = document.getElementById('class-selector').value;
+            window.selectedClass = cls;
+            document.getElementById('agenda-class-title').innerText = cls || '---';
+            if(cls) {
+                if(window.userRole !== ROLES.STUDENTE) document.getElementById('student-list-container').classList.remove('hidden');
+                renderStudentList();
+                loadClassAgenda(cls);
+                loadBacheca();
+            }
         };
 
-        window.addEntry = async (type) => {
-            if(!window.currentUserData) return alert("Errore: Login non effettuato!");
-            const ruolo = window.currentUserData.role.toLowerCase();
-            const isStaff = ruolo.includes('prof') || ruolo.includes('docente') || ruolo.includes('preside') || ruolo.includes('vice') || ruolo.includes('direttore');
-            if (!isStaff) return alert("⛔ Accesso negato!");
-            if (window.currentUserId === window.selectedEntityId) return alert("⛔ Azione non consentita su se stessi!");
+        function renderStudentList() {
+            const list = document.getElementById('student-list');
+            const filtered = window.allStudents.filter(s => s.classe === window.selectedClass);
+            list.innerHTML = filtered.map(s => `
+                <button onclick="window.selectStudent('${s.id}')" class="w-full text-left p-2 rounded hover:bg-zinc-200 text-[10px] font-bold uppercase flex justify-between items-center ${window.selectedStudentId === s.id ? 'bg-zinc-200 border-l-4 border-red-700' : ''}">
+                    ${s.name}
+                </button>
+            `).join('') || '<p class="text-[9px] opacity-40 p-2">Vuoto</p>';
+        }
 
-            const ref = doc(db, 'artifacts', 'fnaf-school-bot', 'public', 'data', 'records', window.selectedEntityId);
-            const inputData = document.getElementById('input-data-custom').value;
-            let dateStr = inputData ? `${inputData.split('-')[2]}/${inputData.split('-')[1]}/${inputData.split('-')[0]}` : new Date().toLocaleDateString('it-IT');
-            const firma = `${document.getElementById('user-name').innerText} (${window.currentUserData.role})`;
-            const isHighStaff = ruolo.includes('preside') || ruolo.includes('direttore') || ruolo.includes('vice');
-             const elMateria = type === 'voti' ? document.getElementById('input-materia') : document.getElementById('input-compito-materia');
-    const m = elMateria.value.toLowerCase().trim();
-            if ((type === 'voti' || type === 'compiti') && !isHighStaff) {
-        const materieDelProf = (window.currentUserData.materie || []).map(val => val.toLowerCase().trim());
-        if (!m) return alert("❌ Seleziona una materia dal menu!");
-        if (!materieDelProf.includes(m)) {
-        return alert("❌ Non sei abilitato a gestire " + m.toUpperCase() + "!");
-    }
-  
-            try {
-                if(type === 'voti') {
-        const v = document.getElementById('input-voto').value;
-        if(!v || !m) return alert("Compila voto e materia!");
-        await setDoc(ref, { 
-            voti: arrayUnion({ voto: v, materia: m, data: dateStr, teacher: firma }),
-            grades: arrayUnion({ value: parseFloat(v), subject: m, date: dateStr, teacher: firma })
-        }, { merge: true });
-                    document.getElementById('input-voto').value = ""; 
-                } else if (type === 'note') {
-                    const t = document.getElementById('input-nota').value;
-                    if(!t) return alert("Scrivi la nota!");
-                    await setDoc(ref, { 
-                        note: arrayUnion({ testo: t, autore: firma, data: dateStr }),
-                        notes: arrayUnion({ text: t, teacher: firma, date: dateStr })
-                    }, { merge: true });
-                    document.getElementById('input-nota').value = "";
-                } else if (type === 'compiti') {
-                    const t = document.getElementById('input-compito-testo').value;
+        window.selectStudent = (id) => {
+            if(window.userRole === ROLES.STUDENTE && id !== window.currentUserId) return;
+            window.selectedStudentId = id;
+            renderStudentList();
+            const student = window.allStudents.find(s => s.id === id);
+            if(!student) return;
+
+            document.getElementById('student-header').classList.remove('hidden');
+            document.getElementById('res-student-name').innerText = student.name;
+            document.getElementById('res-student-role').innerText = student.role;
+            loadStudentRecords(id);
+        };
+
+        // --- CARICAMENTO DATI ---
+        async function loadClassAgenda(cls) {
+            const dateKey = inputCal.value;
+            onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`), d => {
+                const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [] };
                 
-                    if(!t || !m) return alert("Scrivi il compito e la materia!");
-                    await setDoc(ref, { 
-                        compiti: arrayUnion({ testo: t, materia: m, data: dateStr, autore: firma })
-                    }, { merge: true });
-                    document.getElementById('input-compito-testo').value = "";
-                    document.getElementById('input-compito-materia').value = "";
+                // Firme (Tutti vedono tutto)
+                document.getElementById('agenda-firme-list').innerHTML = (data.firme || []).map(f => `<div><b>Ore ${f.ora}</b> - ${f.prof}: ${f.argomento}</div>`).join('') || 'Nessuna firma.';
+                
+                // Compiti (Tutti vedono tutto)
+                document.getElementById('agenda-compiti-list').innerHTML = (data.compiti || []).map(c => `<div class="p-2 bg-zinc-50 rounded border text-[10px] font-bold"><b>${c.materia}</b>: ${c.testo}</div>`).join('') || 'Nessun compito.';
+                
+                // Note e Voti odierni (Filtro Privacy)
+                let infoHtml = "";
+                const note = (data.note || []);
+                const voti = (data.daily_voti || []);
+
+                if(window.userRole === ROLES.STUDENTE) {
+                    const myNote = note.filter(n => n.studenteId === window.currentUserId);
+                    const myVoti = voti.filter(v => v.studenteId === window.currentUserId);
+                    infoHtml += myNote.map(n => `<div class="text-red-600 font-bold">NOTA: ${n.testo}</div>`).join('');
+                    infoHtml += myVoti.map(v => `<div class="text-zinc-800">VOTO: ${v.voto} in ${v.materia}</div>`).join('');
+                } else {
+                    infoHtml += note.map(n => `<div><b>${n.studente}</b>: ${n.testo} (${n.prof})</div>`).join('');
+                    infoHtml += voti.map(v => `<div><b>${v.studente}</b>: ${v.voto} (${v.materia})</div>`).join('');
                 }
-                alert("✅ Registrato con successo!");
-            } catch (e) { alert("Errore: " + e.message); }
-        };
-            try {
-                if(type === 'voti') {
-        const v = document.getElementById('input-voto').value;
-        if(!v || !m) return alert("Compila voto e materia!");
-        await setDoc(ref, { 
-            voti: arrayUnion({ voto: v, materia: m, data: dateStr }),
-            grades: arrayUnion({ value: parseFloat(v), subject: m, date: dateStr, teacher: firma })
-        }, { merge: true });
-                    document.getElementById('input-voto').value = ""; 
-                } else if (type === 'note') {
-                    const t = document.getElementById('input-nota').value;
-                    if(!t) return alert("Scrivi la nota!");
-                    await setDoc(ref, { 
-                        note: arrayUnion({ testo: t, autore: firma, data: dateStr }),
-                        notes: arrayUnion({ text: t, teacher: firma, date: dateStr })
-                    }, { merge: true });
-                    document.getElementById('input-nota').value = "";
-                } else if (type === 'compiti') {
-                    const t = document.getElementById('input-compito-testo').value;
+                document.getElementById('agenda-daily-info').innerHTML = infoHtml || 'Nessun aggiornamento odierno.';
+            });
+        }
+
+        async function loadStudentRecords(studentId) {
+            onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId), d => {
+                const data = d.exists() ? d.data() : { voti: [], note: [] };
                 
-                    if(!t || !m) return alert("Scrivi il compito e la materia!");
-                    await setDoc(ref, { 
-                        compiti: arrayUnion({ testo: t, materia: m, data: dateStr, autore: firma })
-                    }, { merge: true });
-                    document.getElementById('input-compito-testo').value = "";
-                    document.getElementById('input-compito-materia').value = "";
+                // Voti (Filtro Materia Prof)
+                const voti = data.voti || [];
+                const materie = window.userRole === ROLES.PROF ? (window.currentUserData.materie || []) : [...new Set(voti.map(v => v.materia))];
+                let vHtml = "";
+                
+                materie.forEach(m => {
+                    const m_voti = voti.filter(v => v.materia === m);
+                    const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
+                    const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
+                    const avg = m_voti.length ? (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1) : "0.0";
+                    
+                    vHtml += `<tr>
+                        <td class="p-4 font-bold text-red-800 uppercase">${m}</td>
+                        <td class="p-4">${q1.map(v => renderVotoTag(v, studentId)).join('')}</td>
+                        <td class="p-4">${q2.map(v => renderVotoTag(v, studentId)).join('')}</td>
+                        <td class="p-4 text-right font-black text-lg">${avg}</td>
+                    </tr>`;
+                });
+
+                // Sezione Voti Globali per Prof/Preside
+                if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
+                    const altreMaterie = [...new Set(voti.map(v => v.materia))].filter(m => !materie.includes(m));
+                    if(altreMaterie.length > 0) {
+                        vHtml += `<tr class="bg-zinc-100"><td colspan="4" class="p-2 text-[8px] font-black uppercase text-center">Voti Globali (Sola Lettura)</td></tr>`;
+                        altreMaterie.forEach(m => {
+                            const m_voti = voti.filter(v => v.materia === m);
+                            vHtml += `<tr class="opacity-60">
+                                <td class="p-2 pl-4 font-bold uppercase">${m}</td>
+                                <td class="p-2" colspan="2">${m_voti.map(v => `<span class="mr-1">${v.voto}</span>`).join('')}</td>
+                                <td class="p-2 text-right">${(m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1)}</td>
+                            </tr>`;
+                        });
+                    }
                 }
-                alert("✅ Registrato con successo!");
-            } catch (e) { alert("Errore: " + e.message); }
-        };
 
-        window.editEntry = async (type, index) => {
-    const r = window.currentUserData.role.toLowerCase();
-    const isHighStaff = r.includes('preside') || r.includes('direttore') || r.includes('vice');
-    const firma = `${document.getElementById('user-name').innerText} (${window.currentUserData.role})`;
-    
-    if (!(r.includes('prof') || r.includes('docente') || isHighStaff)) return alert("⛔ Azione non consentita!");
-    
-    const ref = doc(db, 'artifacts', 'fnaf-school-bot', 'public', 'data', 'records', window.selectedEntityId);
-    const snap = await getDoc(ref);
-    const data = snap.data();
+                document.getElementById('registro-voti-body').innerHTML = vHtml;
 
-    if (type === 'voti') {
-        const vOld = data.voti || []; 
-        const materiaVoto = vOld[index].materia.toLowerCase().trim();
-        
-        // Controllo permessi materia
-        if (!isHighStaff) {
-            const materieDelProf = (window.currentUserData.materie || []).map(val => val.toLowerCase().trim());
-            if (!materieDelProf.includes(materiaVoto)) {
-                return alert("❌ Non puoi modificare voti di " + materiaVoto.toUpperCase() + "!");
-            }
-        }
-
-        const gOld = data.grades || [];
-        const nuovoV = prompt("Nuovo voto:", vOld[index].voto);
-        const nuovaM = prompt("Nuova materia:", vOld[index].materia);
-        
-        if (nuovoV && nuovaM) {
-            vOld[index].voto = nuovoV; 
-            vOld[index].materia = nuovaM;
-            // Se vuoi tracciare chi ha modificato, puoi aggiungere:
-            vOld[index].teacher = firma; 
-
-            if (gOld[index]) { 
-                gOld[index].value = parseFloat(nuovoV); 
-                gOld[index].subject = nuovaM; 
-                gOld[index].teacher = firma; 
-            }
-            
-            await updateDoc(ref, { voti: vOld, grades: gOld });
-            alert("✅ Voto aggiornato!");
-        }
-    } 
-}; 
-
-        window.deleteEntry = async (type, index) => {
-            const r = window.currentUserData.role.toLowerCase();
-            if(!(r.includes('prof') || r.includes('preside') || r.includes('direttore') || r.includes('vice'))) return alert("⛔ Azione non consentita!");
-            const isHighStaff = r.includes('preside') || r.includes('direttore') || r.includes('vice');
-            const firma = `${document.getElementById('user-name').innerText} (${window.currentUserData.role})`;
-            if(!confirm("Sicuro di voler eliminare questo record?")) return;
-            if(!(r.includes('prof') || r.includes('docente') || isHighStaff)) return alert("⛔ Azione non consentita!");
-            
-            const ref = doc(db, 'artifacts', 'fnaf-school-bot', 'public', 'data', 'records', window.selectedEntityId);
-            const snap = await getDoc(ref);
-            const data = snap.data();
-            
-            if(type === 'voti') {
-            const vOld = data.voti || []; 
-            const gOld = data.grades || [];
-            const materiaVoto = vOld[index].materia.toLowerCase().trim();
-           if (!isHighStaff) {
-          const materieDelProf = (window.currentUserData.materie || []).map(val => val.toLowerCase().trim());
-          if (!materieDelProf.includes(materiaVoto)) {
-          return alert("❌ Non puoi eliminare voti di " + materiaVoto.toUpperCase() + " di un altro collega!");
-        }
-    }
-                vOld.splice(index, 1); 
-                gOld.splice(index, 1);
-                await updateDoc(ref, { voti: vOld, grades: gOld });
-                alert("🗑️ Voto eliminato correttamente.");
-            
-            } else if (type === 'note') {
-                const nOld = data.note || []; const nsOld = data.notes || [];
-                nOld.splice(index, 1); nsOld.splice(index, 1);
-                await updateDoc(ref, { note: nOld, notes: nsOld });
-                
-            } else if (type === 'compiti') {
-                const cOld = data.compiti || [];
-                cOld.splice(index, 1);
-                await updateDoc(ref, { compiti: cOld });
-                alert("🗑️ Compito eliminato.");
-            }
-        };
-
-        window.showTab = (tabName) => {
-            ['voti','note','pagella'].forEach(t => {
-                const el = document.getElementById(`tab-${t}`);
-                if(el) el.className = t === tabName ? 'tab-content active-tab' : 'tab-content';
-                const btn = document.getElementById(`btn-${t}`);
-                if(btn) btn.className = t === tabName ? 'px-5 py-2 text-[9px] font-black uppercase rounded-lg bg-red-700 text-white shadow-lg' : 'px-5 py-2 text-[9px] font-black uppercase rounded-lg text-zinc-500 hover:text-white transition-all';
+                // Note (Gestione Modifica/Elimina)
+                const notes = (data.note || []).reverse();
+                document.getElementById('notes-list-global').innerHTML = notes.map((n, idx) => `
+                    <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm relative group">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="${n.tipo === 'mandato' ? 'bg-black text-amber-400' : 'bg-red-600 text-white'} text-[8px] px-2 py-0.5 rounded font-black uppercase">${n.tipo}</span>
+                            <span class="text-[8px] text-zinc-400 font-bold">${n.data}</span>
+                        </div>
+                        <p id="note-text-${idx}" class="text-xs text-zinc-700">"${n.testo}"</p>
+                        <p class="mt-2 text-[8px] font-black uppercase text-zinc-400">Emesso da: ${n.autore}</p>
+                        ${renderNoteActions(n, idx, studentId)}
+                    </div>
+                `).join('') || '<p class="p-10 text-center opacity-30 uppercase font-black">Nessun record</p>';
             });
+        }
+
+        function renderVotoTag(v, studentId) {
+            const canEdit = (window.userRole === ROLES.PROF && v.profId === window.currentUserId) || window.userRole === ROLES.PRESIDE;
+            return `<span class="mr-1 inline-block px-1 rounded cursor-pointer ${v.voto < 6 ? 'text-red-500 font-bold' : 'text-zinc-800'} ${canEdit ? 'hover:bg-zinc-200' : ''}" onclick="${canEdit ? `window.editVoto('${v.id}', '${studentId}')` : ''}">${v.voto}</span>`;
+        }
+
+        function renderNoteActions(n, idx, studentId) {
+            const isMyNote = n.profId === window.currentUserId;
+            const isPreside = window.userRole === ROLES.PRESIDE;
+            if(!isMyNote && !isPreside) return '';
+            
+            let actions = `<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 flex gap-1">`;
+            actions += `<button onclick="window.editNote(${idx}, '${studentId}')" class="bg-zinc-200 p-1 rounded text-[8px]">✏️</button>`;
+            if(isPreside || (n.tipo !== 'mandato')) {
+                 actions += `<button onclick="window.deleteNote(${idx}, '${studentId}')" class="bg-red-100 p-1 rounded text-[8px]">🗑️</button>`;
+            }
+            actions += `</div>`;
+            return actions;
+        }
+
+        // --- AZIONI SCRITTURA ---
+        window.submitGrade = async () => {
+            const v = document.getElementById('input-grade-val').value;
+            const m = document.getElementById('input-grade-subject').value;
+            if(!v || !m || !window.selectedStudentId) return;
+
+            const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
+            const entry = { 
+                id: crypto.randomUUID(),
+                voto: v, 
+                materia: m, 
+                data: new Date().toLocaleDateString('it-IT'), 
+                prof: window.currentUserData.name,
+                profId: window.currentUserId
+            };
+            
+            await setDoc(ref, { voti: arrayUnion(entry) }, { merge: true });
+            
+            // Log Agenda
+            const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${window.selectedClass}_${inputCal.value}`);
+            await setDoc(agendaRef, { daily_voti: arrayUnion({ studente: window.allStudents.find(s=>s.id===window.selectedStudentId).name, studenteId: window.selectedStudentId, voto: v, materia: m }) }, { merge: true });
+            
+            document.getElementById('input-grade-val').value = "";
         };
 
-        window.searchSidebar = () => {
-            const query = document.getElementById('sidebar-search').value.toLowerCase();
-            document.querySelectorAll('#entity-list button').forEach(btn => {
-                btn.style.display = btn.innerText.toLowerCase().includes(query) ? 'flex' : 'none';
+        window.openModal = (type) => {
+            const body = document.getElementById('modal-body');
+            const confirm = document.getElementById('modal-confirm');
+            document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
+            
+            if(type === 'firme') {
+                body.innerHTML = `
+                    <p class="text-[10px] uppercase font-bold text-zinc-400">Firma Ora Lezione</p>
+                    <input id="m-ora" type="number" placeholder="Ora (es. 1)" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                    <select id="m-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                        ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
+                    </select>
+                    <input id="m-arg" type="text" placeholder="Argomento..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                `;
+                confirm.onclick = async () => {
+                    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${window.selectedClass}_${inputCal.value}`);
+                    await setDoc(ref, { firme: arrayUnion({ ora: document.getElementById('m-ora').value, materia: document.getElementById('m-mat').value, argomento: document.getElementById('m-arg').value, prof: window.currentUserData.name, profId: window.currentUserId }) }, { merge: true });
+                    window.closeModal();
+                };
+            } else if(type === 'note') {
+                body.innerHTML = `
+                    <select id="m-type" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                        <option value="nota">Nota Disciplinare</option>
+                        ${window.userRole === ROLES.PRESIDE ? '<option value="mandato">Mandato Presidenziale</option>' : ''}
+                    </select>
+                    <textarea id="m-txt" placeholder="Motivazione..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24"></textarea>
+                `;
+                confirm.onclick = async () => {
+                    const stud = window.allStudents.find(s=>s.id===window.selectedStudentId);
+                    const note = { 
+                        testo: document.getElementById('m-txt').value, 
+                        tipo: document.getElementById('m-type').value, 
+                        autore: window.currentUserData.name, 
+                        profId: window.currentUserId,
+                        data: new Date().toLocaleDateString('it-IT'),
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId), { note: arrayUnion(note) }, { merge: true });
+                    
+                    if(note.tipo === 'nota') {
+                        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', `${window.selectedClass}_${inputCal.value}`), { note: arrayUnion({...note, studente: stud.name, studenteId: stud.id, prof: window.currentUserData.name}) }, { merge: true });
+                    } else if(note.tipo === 'mandato') {
+                        // Notifica al Preside (se emesso da altri, ma qui è solo preside)
+                        // Invia record notifica a tutti i prof
+                        const notifRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global');
+                        await setDoc(notifRef, { alerts: arrayUnion({ msg: `MANDATO: ${stud.name} convocato dal Preside`, time: new Date().toLocaleTimeString() }) }, { merge: true });
+                    }
+                    window.closeModal();
+                };
+            }
+        };
+
+        // --- NOTIFICHE ---
+        function listenNotifications() {
+            onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global'), d => {
+                if(d.exists()) {
+                    const alerts = d.data().alerts || [];
+                    document.getElementById('notif-count').innerText = alerts.length;
+                }
             });
+        }
+
+        // --- BACHECA ---
+        async function loadBacheca() {
+            onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'bulletin', 'general'), d => {
+                const data = d.exists() ? d.data() : { posts: [] };
+                document.getElementById('bacheca-container').innerHTML = data.posts.slice().reverse().map(p => `
+                    <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
+                        <p class="text-sm text-zinc-800">${p.text}</p>
+                        <div class="mt-2 text-[8px] font-black uppercase text-zinc-400">${p.date} — Da: ${p.author}</div>
+                    </div>
+                `).join('') || '<p class="text-center p-10 opacity-20 uppercase font-black">Nessun avviso</p>';
+            });
+        }
+
+        window.addBacheca = async () => {
+            const txt = document.getElementById('input-bacheca-text').value;
+            if(!txt) return;
+            const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'bulletin', 'general');
+            await setDoc(ref, { posts: arrayUnion({ text: txt, author: window.currentUserData.name, date: new Date().toLocaleString('it-IT') }) }, { merge: true });
+            document.getElementById('input-bacheca-text').value = "";
+        }
+
+        // --- AUTH & LOGIN ---
+        window.loginDiscord = () => {
+            const uri = encodeURIComponent(window.location.origin + window.location.pathname);
+            window.location.href = `https://discord.com/api/oauth2/authorize?client_id=1469524509106110484&redirect_uri=${uri}&response_type=token&scope=identify`;
         };
 
         async function checkAuth() {
@@ -490,24 +566,61 @@
                     const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` } });
                     const user = await res.json();
                     window.currentUserId = user.id;
+                    
                     document.getElementById('login-btn').classList.add('hidden');
                     document.getElementById('user-profile').classList.remove('hidden');
                     document.getElementById('user-name').innerText = user.username;
                     document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
 
-                    const uDoc = await getDoc(doc(db, 'artifacts', 'fnaf-school-bot', 'public', 'data', 'assignments', user.id));
+                    const uDoc = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', user.id));
                     if(uDoc.exists()) {
                         window.currentUserData = uDoc.data();
-                        const r = window.currentUserData.role.toLowerCase();
-                        if (r.includes('prof') || r.includes('docente') || r.includes('preside') || r.includes('vice') || r.includes('direttore')) {
-                            document.getElementById('admin-panel').classList.remove('hidden');
-                            document.getElementById('admin-title').innerText = `Gestione: ${window.currentUserData.role}`;
+                        window.userRole = getRoleType(window.currentUserData.role);
+                        applyRoleUI();
+                        
+                        // Materie per i Prof
+                        if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
+                            const mSelect = document.getElementById('input-grade-subject');
+                            const mats = window.currentUserData.materie || (window.userRole === ROLES.PRESIDE ? ['Dirigenza'] : []);
+                            mSelect.innerHTML = mats.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
                         }
                     }
                     window.history.replaceState({}, document.title, window.location.pathname);
-                } catch (e) { console.error("Errore Auth:", e); }
+                } catch (e) { console.error("Discord Error:", e); }
+            } else {
+                applyRoleUI(); // Ospite
             }
         }
+
+        window.changeMenu = (menu) => {
+            document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(`menu-${menu}`).classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(v => v.classList.remove('active-view'));
+            document.getElementById(`view-${menu}`).classList.add('active-view');
+        };
+
+        window.closeModal = () => document.getElementById('modal-overlay').classList.replace('flex', 'hidden');
+
+        function isDateInQ(dateStr, q) {
+            if(!dateStr) return false;
+            const parts = dateStr.split('/');
+            const month = parseInt(parts[1]);
+            if (q === 1) return (month >= 9 || month <= 1);
+            if (q === 2) return (month >= 2 && month <= 6);
+            return false;
+        }
+
+        // Funzioni extra per cancellazione/modifica (placeholder per integrità)
+        window.deleteNote = async (idx, studentId) => {
+            if(!confirm("Eliminare questa nota?")) return;
+            const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+            const d = await getDoc(ref);
+            if(d.exists()) {
+                const notes = d.data().note;
+                notes.splice(idx, 1);
+                await updateDoc(ref, { note: notes });
+            }
+        };
     </script>
 </body>
 </html>
