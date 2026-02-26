@@ -518,7 +518,7 @@
                 studenteId: stud.id
             }) 
         }, { merge: true });
-                    } else if(note.tipo === 'mandato') {
+                        if(note.tipo === 'mandato') {
                         // Notifica al Preside (se emesso da altri, ma qui è solo preside)
                         // Invia record notifica a tutti i prof
                         const notifRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global');
