@@ -437,7 +437,7 @@
             if (canEdit) {
             onclickHandler = "window.editVoto('" + v.id + "', '" + studentId + "')";
             }
-            return `<span class="mr-1 inline-block px-1 rounded cursor-pointer ${colorClass} ${hoverClass}" onclick="${onclickHandler}">${v.voto}</span>`;
+            return "<span class=\"mr-1 inline-block px-1 rounded cursor-pointer " + colorClass + " " + hoverClass + "\" onclick=\"" + onclickHandler + "\">" + v.voto + "</span>";
         }
 
         function renderNoteActions(n, idx, studentId) {
