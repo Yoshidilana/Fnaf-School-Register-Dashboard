@@ -409,16 +409,19 @@
                 document.getElementById('registro-voti-body').innerHTML = vHtml;
 
                 // Note (Gestione Modifica/Elimina)
-                const notes = (data.note || []).reverse();
-                document.getElementById('notes-list-global').innerHTML = notes.map((n, idx) => `
+                const originalNotes = data.note || [];
+                const reversedNotes = [...originalNotes].reverse();
+                document.getElementById('notes-list-global').innerHTML = reversedNotes.map((n, viewIdx) => {
+                    const realIdx = originalNotes.length - 1 - viewIdx;
+                    return `
                     <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm relative group">
                         <div class="flex justify-between items-center mb-2">
                             <span class="${n.tipo === 'mandato' ? 'bg-black text-amber-400' : 'bg-red-600 text-white'} text-[8px] px-2 py-0.5 rounded font-black uppercase">${n.tipo}</span>
                             <span class="text-[8px] text-zinc-400 font-bold">${n.data}</span>
                         </div>
-                        <p id="note-text-${idx}" class="text-xs text-zinc-700">"${n.testo}"</p>
+                        <p id="note-text-${realIdx}" class="text-xs text-zinc-700">"${n.testo}"</p>
                         <p class="mt-2 text-[8px] font-black uppercase text-zinc-400">Emesso da: ${n.prof || n.autore}</p>
-                        ${renderNoteActions(n, idx, studentId)}
+                        ${renderNoteActions(n, realIdx, studentId)}
                     </div>
                 `).join('') || '<p class="p-10 text-center opacity-30 uppercase font-black">Nessun record</p>';
             });
