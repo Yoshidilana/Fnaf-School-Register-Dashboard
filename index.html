@@ -432,7 +432,7 @@
             const clickHandler = canEdit ? "window.editVoto('" + v.id + "', '" + studentId + "')" : "";
             const colorClass = v.voto < 6 ? 'text-red-500 font-bold' : 'text-zinc-800';
             const hoverClass = canEdit ? 'hover:bg-zinc-200' : '';
-            const clickAttr = canEdit ? `onclick="window.editVoto('${v.id}', '${studentId}')"` : '';
+            const clickAttr = canEdit ? "onclick=\"window.editVoto('" + v.id + "', '" + studentId + "')\"" : "";
             return `<span class="mr-1 inline-block px-1 rounded cursor-pointer ${colorClass} ${hoverClass}" ${clickAttr}>${v.voto}</span>`;
         }
 
