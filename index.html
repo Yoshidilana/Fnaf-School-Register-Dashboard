@@ -429,7 +429,8 @@
 
         function renderVotoTag(v, studentId) {
             const canEdit = (window.userRole === ROLES.PROF && v.profId === window.currentUserId) || window.userRole === ROLES.PRESIDE;
-            return `<span class="mr-1 inline-block px-1 rounded cursor-pointer ${v.voto < 6 ? 'text-red-500 font-bold' : 'text-zinc-800'} ${canEdit ? 'hover:bg-zinc-200' : ''}" onclick="${canEdit ? `window.editVoto('${v.id}', '${studentId}')` : ''}">${v.voto}</span>`;
+            const clickHandler = canEdit ? "window.editVoto('" + v.id + "', '" + studentId + "')" : "";
+            return `<span class="mr-1 inline-block px-1 rounded cursor-pointer ${v.voto < 6 ? 'text-red-500 font-bold' : 'text-zinc-800'} ${canEdit ? 'hover:bg-zinc-200' : ''}" onclick="${clickHandler}">${v.voto}</span>`;
         }
 
         function renderNoteActions(n, idx, studentId) {
