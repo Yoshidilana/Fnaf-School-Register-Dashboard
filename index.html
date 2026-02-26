@@ -423,7 +423,7 @@
                         <p class="mt-2 text-[8px] font-black uppercase text-zinc-400">Emesso da: ${n.prof || n.autore}</p>
                         ${renderNoteActions(n, realIdx, studentId)}
                     </div>
-                `).join('') || '<p class="p-10 text-center opacity-30 uppercase font-black">Nessun record</p>';
+                }).join('') || '<p class="p-10 text-center opacity-30 uppercase font-black">Nessun record</p>';
             });
         }
 
