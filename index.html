@@ -428,12 +428,16 @@
         }
 
         function renderVotoTag(v, studentId) {
-            const canEdit = (window.userRole === ROLES.PROF && v.profId === window.currentUserId) || window.userRole === ROLES.PRESIDE;
-            let spanClass = "mr-1 inline-block px-1 rounded cursor-pointer ";;
-            spanClass += (v.voto < 6) ? "text-red-500 font-bold " : "text-zinc-800 ";
-            if (canEdit) spanClass += "hover:bg-zinc-200 ";
-            const clickAttr = canEdit ? "onclick=\"window.editVoto('" + v.id + "', '" + studentId + "')\"" : "";
-            return `<span class="${spanClass}" ${clickAttr}>${v.voto}</span>`;
+            const isProf = window.userRole === ROLES.PROF && v.profId === window.currentUserId;
+            const isPreside = window.userRole === ROLES.PRESIDE;
+            const canEdit = isProf || isPreside;
+            const colorClass = v.voto < 6 ? 'text-red-500 font-bold' : 'text-zinc-800';
+            const hoverClass = canEdit ? 'hover:bg-zinc-200' : '';
+            let onclickHandler = "";
+            if (canEdit) {
+            onclickHandler = "window.editVoto('" + v.id + "', '" + studentId + "')";
+            }
+            return `<span class="mr-1 inline-block px-1 rounded cursor-pointer ${colorClass} ${hoverClass}" onclick="${onclickHandler}">${v.voto}</span>`;
         }
 
         function renderNoteActions(n, idx, studentId) {
