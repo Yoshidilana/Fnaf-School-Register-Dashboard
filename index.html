@@ -462,7 +462,7 @@
             await setDoc(ref, { voti: arrayUnion(entry) }, { merge: true });
             
             // Log Agenda
-            const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${window.selectedClass}_${inputCal.value}`);
+            const agendaRef = db.collection('artifacts').document('fnaf-school-bot').collection('public').document('data').collection('agendas').doc(idAgenda);
             await setDoc(agendaRef, { daily_voti: arrayUnion({ studente: window.allStudents.find(s=>s.id===window.selectedStudentId).name, studenteId: window.selectedStudentId, voto: v, materia: m }) }, { merge: true });
             
             document.getElementById('input-grade-val').value = "";
