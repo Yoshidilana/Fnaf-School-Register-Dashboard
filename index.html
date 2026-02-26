@@ -497,7 +497,8 @@
                 `;
                 confirm.onclick = async () => {
                     const stud = window.allStudents.find(s=>s.id===window.selectedStudentId);
-                    const note = { 
+                    const dataOggi = new Date().toLocaleDateString('it-IT');
+                    const note = {
                         testo: document.getElementById('m-txt').value, 
                         tipo: document.getElementById('m-type').value, 
                         autore: window.currentUserData.name, 
@@ -508,8 +509,15 @@
                     
                     await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId), { note: arrayUnion(note) }, { merge: true });
                     
-                    if(note.tipo === 'nota') {
-                        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', `${window.selectedClass}_${inputCal.value}`), { note: arrayUnion({...note, studente: stud.name, studenteId: stud.id, prof: window.currentUserData.name}) }, { merge: true });
+                    const agendaId = `${window.selectedClass}_${inputCal.value}`;
+                    const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+                    await setDoc(agendaRef, { 
+            note: arrayUnion({
+                ...note, 
+                studente: stud.name, 
+                studenteId: stud.id
+            }) 
+        }, { merge: true });
                     } else if(note.tipo === 'mandato') {
                         // Notifica al Preside (se emesso da altri, ma qui è solo preside)
                         // Invia record notifica a tutti i prof
