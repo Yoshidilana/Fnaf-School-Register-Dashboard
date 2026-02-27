@@ -433,9 +433,17 @@
 
                 // Note (Gestione Modifica/Elimina)
                 const originalNotes = data.note || [];
+                const filteredNotes = originalNotes.filter(n => {
+                let nAy = n.anno;
+                if(!nAy && n.data) {
+                const p = n.data.split('/');
+                nAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
+                }
+                return nAy === aySelezionato;
+                });
                 const reversedNotes = [...originalNotes].reverse();
                 document.getElementById('notes-list-global').innerHTML = reversedNotes.map((n, viewIdx) => {
-                    const realIdx = originalNotes.length - 1 - viewIdx;
+                    const realIdx = originalNotes.findIndex(origNote => origNote.id === n.id || (origNote.testo === n.testo && origNote.data === n.data));
                     return `
                     <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm relative group">
                         <div class="flex justify-between items-center mb-2">
@@ -446,7 +454,7 @@
                         <p class="mt-2 text-[8px] font-black uppercase text-zinc-400">Emesso da: ${n.prof || n.autore}</p>
                         ${renderNoteActions(n, realIdx, studentId)}
                     </div>`;
-                }).join('') || '<p class="p-10 text-center opacity-30 uppercase font-black">Nessun record</p>';
+                }).join('') || `<p class="p-10 text-center opacity-30 uppercase font-black italic text-xs">Nessuna nota per l'A.S. ${aySelezionato}</p>`;
             });
         }
 
