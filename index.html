@@ -535,7 +535,7 @@
                 body.innerHTML = `
                     <select id="m-type" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
                         <option value="nota">Nota Disciplinare</option>
-                        ${window.userRole === ROLES.PRESIDE ? '<option value="mandato">Mandato Presidenziale</option>' : ''}
+                        ${(window.userRole === ROLES.PRESIDE || window.userRole === ROLES.PROF) ? '<option value="mandato">Mandato Presidenziale</option>' : ''}
                     </select>
                     <textarea id="m-txt" placeholder="Motivazione..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24"></textarea>
                 `;
