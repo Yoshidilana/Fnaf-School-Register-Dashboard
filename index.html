@@ -459,13 +459,14 @@
             const v = document.getElementById('input-grade-val').value;
             const m = document.getElementById('input-grade-subject').value;
             if(!v || !m || !window.selectedStudentId) return;
-
+            const dParts = inputCal.value.split('-');
+            const dataFormattata = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
             const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
             const entry = { 
                 id: crypto.randomUUID(),
                 voto: v, 
                 materia: m, 
-                data: new Date().toLocaleDateString('it-IT'), 
+                data: dataFormattata,
                 prof: window.currentUserData.name,
                 profId: window.currentUserId
             };
