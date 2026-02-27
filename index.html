@@ -415,16 +415,13 @@
 
                 // Sezione Voti Globali per Prof/Preside
                 if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
-                    const materieNormalizzate = materie.map(m => m.toLowerCase().trim());
-                    const altreMaterie = [...new Set(voti.map(v => v.materia.toLowerCase().trim()))]
-                            .filter(m => !materieNormalizzate.includes(m));
+                    const altreMaterie = [...new Set(voti.map(v => v.materia))].filter(m => !materie.includes(m));
                     if(altreMaterie.length > 0) {
                         vHtml += `<tr class="bg-zinc-100"><td colspan="4" class="p-2 text-[8px] font-black uppercase text-center">Voti Globali (Sola Lettura)</td></tr>`;
                         altreMaterie.forEach(m => {
-                            const m_voti = voti.filter(v => v.materia.toLowerCase().trim() === m);
-                            const materiaFormattata = m.charAt(0).toUpperCase() + m.slice(1);
+                            const m_voti = voti.filter(v => v.materia === m);
                             vHtml += `<tr class="opacity-60">
-                                <td class="p-2 pl-4 font-bold uppercase">${materiaFormattata}</td>
+                                <td class="p-2 pl-4 font-bold uppercase">${m}</td>
                                 <td class="p-2" colspan="2">${m_voti.map(v => `<span class="mr-1">${v.voto}</span>`).join('')}</td>
                                 <td class="p-2 text-right">${(m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1)}</td>
                             </tr>`;
