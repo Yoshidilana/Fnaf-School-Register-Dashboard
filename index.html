@@ -379,14 +379,14 @@
                 const dateVal = new Date(inputCal.value);
                 const yearVal = dateVal.getFullYear();
                 const aySelezionato = (dateVal.getMonth() + 1) >= 9 ? `${yearVal}/${yearVal + 1}` : `${yearVal - 1}/${yearVal}`;
-                const materie = window.userRole === ROLES.PROF ? (window.currentUserData.materie || []) : [...new Set(voti.filter(v => {
+                const materie = (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) ? (window.currentUserData.materie || []) : [...new Set(voti.filter(v => {
                 let vAy = v.anno;
                 if(!vAy && v.data) {
                 const p = v.data.split('/');
                 vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
                 }
                 return vAy === aySelezionato;
-                }).map(v => v.materia))];
+                }).map(v => v.materia.toLowerCase().trim()))];
 
                 let vHtml = "";
                 
