@@ -541,14 +541,21 @@
                 `;
                 confirm.onclick = async () => {
                     const stud = window.allStudents.find(s=>s.id===window.selectedStudentId);
-                    const dataOggi = new Date().toLocaleDateString('it-IT');
+                    const inputCal = document.getElementById('global-calendar');
+                    const dParts = inputCal.value.split('-');
+                    const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+                    const month = parseInt(dParts[1]);
+                    const year = parseInt(dParts[0]);
+                    const annoScolastico = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
                     const note = {
+                        id: crypto.randomUUID(),
                         testo: document.getElementById('m-txt').value, 
                         tipo: document.getElementById('m-type').value, 
                         autore: window.currentUserData.name, 
                         prof: window.currentUserData.name,
                         profId: window.currentUserId,
-                        data: new Date().toLocaleDateString('it-IT'),
+                        data: dataScelta,
+                        anno: annoScolastico,
                         timestamp: new Date().toISOString()
                     };
                     
