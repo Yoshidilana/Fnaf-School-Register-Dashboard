@@ -533,6 +533,33 @@
                     await setDoc(ref, { firme: arrayUnion({ ora: document.getElementById('m-ora').value, materia: document.getElementById('m-mat').value, argomento: document.getElementById('m-arg').value, prof: window.currentUserData.name, profId: window.currentUserId }) }, { merge: true });
                     window.closeModal();
                 };
+          } else if(type === 'compiti') {
+              body.innerHTML = `
+                <p class="text-[10px] uppercase font-bold text-zinc-400">Assegna Compiti per Casa</p>
+                <select id="m-compiti-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                    ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
+                </select>
+                <textarea id="m-compiti-txt" placeholder="Descrizione compiti..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24 text-white"></textarea>
+            `;
+            confirm.onclick = async () => {
+                const mat = document.getElementById('m-compiti-mat').value;
+                const txt = document.getElementById('m-compiti-txt').value;
+                if(!txt) return;
+
+                const agendaId = `${window.selectedClass}_${inputCal.value}`;
+                const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+                
+                await setDoc(ref, { 
+                    compiti: arrayUnion({ 
+                        materia: mat, 
+                        testo: txt, 
+                        prof: window.currentUserData.name, 
+                        profId: window.currentUserId 
+                    }) 
+                }, { merge: true });
+
+                window.closeModal();
+            };                
             } else if(type === 'note') {
                 body.innerHTML = `
                     <select id="m-type" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
