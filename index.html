@@ -441,8 +441,8 @@
                 }
                 return nAy === aySelezionato;
                 });
-                const reversedNotes = [...originalNotes].reverse();
-                document.getElementById('notes-list-global').innerHTML = reversedNotes.map((n, viewIdx) => {
+                const reversedNotes = [...filteredNotes].reverse();
+                document.getElementById('notes-list-global').innerHTML = reversedNotes.map((n) => {
                     const realIdx = originalNotes.findIndex(origNote => origNote.id === n.id || (origNote.testo === n.testo && origNote.data === n.data));
                     return `
                     <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm relative group">
