@@ -376,12 +376,27 @@
                 const dateVal = new Date(inputCal.value);
                 const yearVal = dateVal.getFullYear();
                 const aySelezionato = (dateVal.getMonth() + 1) >= 9 ? `${yearVal}/${yearVal + 1}` : `${yearVal - 1}/${yearVal}`;
-                const materie = window.userRole === ROLES.PROF ? (window.currentUserData.materie || []) : [...new Set(voti.filter(v => v.anno === aySelezionato).map(v => v.materia))];
+                const materie = window.userRole === ROLES.PROF ? (window.currentUserData.materie || []) : [...new Set(voti.filter(v => {
+                let vAy = v.anno;
+                if(!vAy && v.data) {
+                const p = v.data.split('/');
+                vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
+                }
+                return vAy === aySelezionato;
+                }).map(v => v.materia))];
 
                 let vHtml = "";
                 
                 materie.forEach(m => {
-                    const m_voti = voti.filter(v => v.materia === m && v.anno === aySelezionato);
+                    const m_voti = voti.filter(v => {
+                    if (v.materia !== m) return false;
+                    let vAy = v.anno;
+                    if (!vAy && v.data) {
+                    const p = v.data.split('/');
+                    vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
+                    }
+                    return vAy === aySelezionato;
+                    }); 
                     const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
                     const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
                     const avg = m_voti.length ? (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1) : "0.0";
