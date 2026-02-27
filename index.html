@@ -414,7 +414,7 @@
                 });
 
                 // Sezione Voti Globali per Prof/Preside
-                if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
+                if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) {
                     const materieNormalizzate = materie.map(m => m.toLowerCase().trim());
                     const altreMaterie = [...new Set(voti.map(v => v.materia.toLowerCase().trim()))]
                             .filter(m => !materieNormalizzate.includes(m));
