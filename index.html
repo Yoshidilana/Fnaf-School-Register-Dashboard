@@ -620,14 +620,34 @@
         };
 
         // --- NOTIFICHE ---
-        function listenNotifications() {
-            onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global'), d => {
-                if(d.exists()) {
-                    const alerts = d.data().alerts || [];
-                    document.getElementById('notif-count').innerText = alerts.length;
+       function listenNotifications() {
+    onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global'), d => {
+        if(d.exists()) {
+            const alerts = d.data().alerts || [];
+            const badge = document.getElementById('notif-count');
+            const listContent = document.getElementById('notif-list-content');
+
+            // Aggiorna il numero sulla campanella
+            badge.innerText = alerts.length;
+            
+            if(alerts.length === 0) {
+                badge.classList.add('hidden');
+                if(listContent) listContent.innerHTML = '<p class="text-center text-[9px] text-zinc-400 italic py-4">Nessun mandato</p>';
+            } else {
+                badge.classList.remove('hidden');
+                // Popola il contenuto del pannello (quello che hai incollato nell'HTML)
+                if(listContent) {
+                    listContent.innerHTML = alerts.slice().reverse().map(a => `
+                        <div class="p-2 bg-zinc-50 border-l-2 border-amber-500 rounded text-[10px]">
+                            <p class="font-bold text-zinc-800">${a.msg}</p>
+                            <p class="text-[8px] text-zinc-400 uppercase mt-1">${a.time}</p>
+                        </div>
+                    `).join('');
                 }
-            });
+            }
         }
+    });
+}
 
         // --- BACHECA ---
         async function loadBacheca() {
