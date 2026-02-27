@@ -392,7 +392,7 @@
                 
                 materie.forEach(m => {
                     const m_voti = voti.filter(v => {
-                    if (v.materia !== m) return false;
+                    if (v.materia.toLowerCase().trim() !== m.toLowerCase().trim()) return false;
                     let vAy = v.anno;
                     if (!vAy && v.data) {
                     const p = v.data.split('/');
