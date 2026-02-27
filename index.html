@@ -228,6 +228,7 @@
             document.getElementById('current-academic-year').innerText = `A.S. ${ay}`;
             document.getElementById('period-indicator').innerText = (month >= 9 || month <= 1) ? "1° Quadrimestre" : "2° Quadrimestre";
             if(window.selectedClass) window.handleClassChange();
+            if(window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
         };
         window.updateDateContext();
 
@@ -370,6 +371,7 @@
         async function loadStudentRecords(studentId) {
             const calElement = document.getElementById('global-calendar');
             onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId), d => {
+                document.getElementById('registro-voti-body').innerHTML = "";
                 const data = d.exists() ? d.data() : { voti: [], note: [] };
                 
                 // Voti (Filtro Materia Prof)
