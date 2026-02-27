@@ -368,6 +368,7 @@
         }
 
         async function loadStudentRecords(studentId) {
+            const inputCal = document.getElementById('global-calendar');
             onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId), d => {
                 const data = d.exists() ? d.data() : { voti: [], note: [] };
                 
