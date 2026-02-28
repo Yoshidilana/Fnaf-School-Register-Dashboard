@@ -760,15 +760,95 @@
             return false;
         }
 
-        // Funzioni extra per cancellazione/modifica (placeholder per integrità)
-        window.deleteNote = async (idx, studentId) => {
-            if(!confirm("Eliminare questa nota?")) return;
-            const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
-            const d = await getDoc(ref);
+// --- FUNZIONI DI GESTIONE INTEGRATA (PROFILO + AGENDA) ---
+
+        window.editNote = async (idx, studentId) => {
+            const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+            const d = await getDoc(recordRef);
             if(d.exists()) {
-                const notes = d.data().note;
+                const notes = d.data().note || [];
+                const vecchiaNota = { ...notes[idx] };
+                const nuovoTesto = prompt("Modifica la nota/mandato:", vecchiaNota.testo);
+                
+                if (nuovoTesto !== null && nuovoTesto !== "" && nuovoTesto !== vecchiaNota.testo) {
+                    // 1. Aggiorna Profilo Studente
+                    notes[idx].testo = nuovoTesto;
+                    await updateDoc(recordRef, { note: notes });
+
+                    // 2. Aggiorna Agenda Globale
+                    const agendaId = vecchiaNota.data.split('/').reverse().join('');
+                    const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agenda', agendaId);
+                    const aSnap = await getDoc(agendaRef);
+                    if(aSnap.exists()) {
+                        let assignments = aSnap.data().assignments || [];
+                        assignments = assignments.map(a => 
+                            (a.studentId === studentId && a.testo === vecchiaNota.testo) 
+                            ? { ...a, testo: nuovoTesto } : a
+                        );
+                        await updateDoc(agendaRef, { assignments: assignments });
+                    }
+                    alert("Nota aggiornata ovunque!");
+                    location.reload();
+                }
+            }
+        };
+
+        window.editVoto = async (idx, studentId) => {
+            const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+            const d = await getDoc(recordRef);
+            if(d.exists()) {
+                const voti = d.data().voti || [];
+                const vecchioVoto = { ...voti[idx] };
+                const nuovoVoto = prompt("Modifica il valore del voto:", vecchioVoto.voto);
+                
+                if (nuovoVoto !== null && nuovoVoto !== "" && nuovoVoto !== vecchioVoto.voto) {
+                    // 1. Aggiorna Profilo Studente
+                    voti[idx].voto = nuovoVoto;
+                    await updateDoc(recordRef, { voti: voti });
+
+                    // 2. Aggiorna Agenda Globale
+                    const agendaId = vecchioVoto.data.split('/').reverse().join('');
+                    const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agenda', agendaId);
+                    const aSnap = await getDoc(agendaRef);
+                    if(aSnap.exists()) {
+                        let assignments = aSnap.data().assignments || [];
+                        assignments = assignments.map(a => 
+                            (a.studentId === studentId && a.materia === vecchioVoto.materia && a.voto === vecchioVoto.voto) 
+                            ? { ...a, voto: nuovoVoto } : a
+                        );
+                        await updateDoc(agendaRef, { assignments: assignments });
+                    }
+                    alert("Voto aggiornato ovunque!");
+                    location.reload();
+                }
+            }
+        };
+
+        window.deleteNote = async (idx, studentId) => {
+            if(!confirm("Eliminare definitivamente questa nota? Verrà rimossa anche dall'agenda.")) return;
+            const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+            const d = await getDoc(recordRef);
+            if(d.exists()) {
+                const notes = d.data().note || [];
+                const notaDaEliminare = notes[idx];
+                
+                // 1. Rimuovi dal Profilo Studente
                 notes.splice(idx, 1);
-                await updateDoc(ref, { note: notes });
+                await updateDoc(recordRef, { note: notes });
+
+                // 2. Rimuovi dall'Agenda Globale
+                const agendaId = notaDaEliminare.data.split('/').reverse().join('');
+                const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agenda', agendaId);
+                const aSnap = await getDoc(agendaRef);
+                if(aSnap.exists()) {
+                    let assignments = aSnap.data().assignments || [];
+                    const nuoviAssignments = assignments.filter(a => 
+                        !(a.studentId === studentId && a.testo === notaDaEliminare.testo)
+                    );
+                    await updateDoc(agendaRef, { assignments: nuoviAssignments });
+                }
+                alert("Eliminata con successo!");
+                location.reload();
             }
         };
     </script>
