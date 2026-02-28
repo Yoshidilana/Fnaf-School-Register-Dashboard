@@ -856,8 +856,6 @@
                 if(aSnap.exists()) {
                     let agendaNotes = aSnap.data().note || [];
                     const nuoveNote = agendaNotes.filter(n => n.id !== notaDaEliminare.id);
-                        !(a.studentId === studentId && a.testo === notaDaEliminare.testo)
-                    );
                     await updateDoc(agendaRef, { assignments: nuoviAssignments });
                 }
                 alert("Eliminata con successo!");
