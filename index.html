@@ -611,6 +611,9 @@
                         if(note.tipo === 'mandato') {
                         // Notifica al Preside (se emesso da altri, ma qui è solo preside)
                         // Invia record notifica a tutti i prof
+                        const inputCal = document.getElementById('global-calendar');
+                        const dParts = inputCal.value.split('-');
+                        const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
                         const notifRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global');
                         const inputElement = document.getElementById('m-txt');
                         const notaTesto = inputElement ? inputElement.value : "Motivazione non inserita";   
