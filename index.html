@@ -783,11 +783,11 @@
                         let agendaNotes = aSnap.data().note || [];
                         agendaNotes = agendaNotes.map(n =>
                             (a.studentId === studentId && a.testo === vecchiaNota.testo) 
-                            ? (n.id === vecchiaNota.id) ? { ...n, testo: nuovoTesto } : n
+                            (n.id === vecchiaNota.id) ? { ...n, testo: nuovoTesto } : n
                         );
                         await updateDoc(agendaRef, { note: agendaNotes });
                     }
-                    alert("Nota aggiornata ovunque!");
+                    alert("Nota aggiornata");
                     location.reload();
                 }
             }
