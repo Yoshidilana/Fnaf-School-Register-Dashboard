@@ -777,7 +777,7 @@
 
                     // 2. Aggiorna Agenda Globale
                     const agendaId = vecchiaNota.data.split('/').reverse().join('');
-                    const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agenda', agendaId);
+                    const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
                     const aSnap = await getDoc(agendaRef);
                     if(aSnap.exists()) {
                         let assignments = aSnap.data().assignments || [];
@@ -851,7 +851,7 @@
 
                 // 2. Rimuovi dall'Agenda Globale
                 const agendaId = notaDaEliminare.data.split('/').reverse().join('');
-                const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agenda', agendaId);
+                const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
                 const aSnap = await getDoc(agendaRef);
                 if(aSnap.exists()) {
                     let assignments = aSnap.data().assignments || [];
