@@ -477,9 +477,9 @@
             const hoverClass = canEdit ? 'hover:bg-zinc-200' : '';
             let onclickHandler = "";
             if (canEdit) {
-            onclickHandler = "window.editVoto('" + v.id + "', '" + studentId + "')";
+            onclickHandler = `window.editVoto('${v.id}', '${studentId}')`;
             }
-            return "<span class=\"mr-1 inline-block px-1 rounded cursor-pointer " + colorClass + " " + hoverClass + "\" onclick=\"" + onclickHandler + "\">" + v.voto + "</span>";
+            return `<span class="mr-1 inline-block px-1 rounded cursor-pointer ${colorClass} ${hoverClass}" onclick="${onclickHandler}">${v.voto}</span>`;
         }
 
         function renderNoteActions(n, idx, studentId) {
@@ -793,51 +793,50 @@
             }
         };
 
-        window.editVoto = async (idRicevuto, studentId) => { // <--- Lo chiamiamo idRicevuto
-           const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
-           const d = await getDoc(recordRef);
+        window.editVoto = async (idRicevuto, studentId) => {
+            console.log("Tentativo modifica voto ID:", idRicevuto, "per studente:", studentId);
+            const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+            const d = await getDoc(recordRef);
     
-           if(d.exists()) {
-           const listaVoti = d.data().voti || []; 
+            if(d.exists()) {
+                const listaVoti = d.data().voti || []; 
+                // Cerchiamo l'elemento che ha l'ID uguale a quello ricevuto
+                const indiceVoto = listaVoti.findIndex(v => v.id === idRicevuto);
         
-        // Cerchiamo l'elemento che ha l'ID uguale a quello ricevuto dal pulsante
-            const indiceVoto = listaVoti.findIndex(v => v.id === idRicevuto);
-        
-          if (indiceVoto === -1) {
-            console.error("Voto non trovato con ID:", idRicevuto);
-            alert("Errore: Impossibile trovare questo voto.");
-            return;
-        }
+                if (indiceVoto === -1) {
+                    console.error("Voto non trovato. ID ricevuto:", idRicevuto);
+                    console.log("Lista voti disponibile:", listaVoti);
+                    alert("Errore: Impossibile trovare questo voto nel database.");
+                    return;
+                }
 
-         const vecchioVoto = { ...listaVoti[indiceVoto] };
-         const nuovoVoto = prompt("Modifica il valore del voto:", vecchioVoto.voto);
+                const vecchioVoto = { ...listaVoti[indiceVoto] };
+                const nuovoVoto = prompt("Modifica il valore del voto:", vecchioVoto.voto);
         
-         if (nuovoVoto !== null && nuovoVoto !== "" && nuovoVoto !== vecchioVoto.voto) {
-            // 1. Aggiorna Profilo Studente
-            listaVoti[indiceVoto].voto = nuovoVoto;
-            await updateDoc(recordRef, { voti: listaVoti });
+                if (nuovoVoto !== null && nuovoVoto !== "" && nuovoVoto !== vecchioVoto.voto) {
+                    listaVoti[indiceVoto].voto = nuovoVoto;
+                    await updateDoc(recordRef, { voti: listaVoti });
 
-            // 2. Aggiorna Agenda Globale
-            const dataParts = vecchioVoto.data.split('/');
-            const agendaId = `${window.selectedClass}_${dataParts[2]}-${dataParts[1]}-${dataParts[0]}`;
-            const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+                    // Aggiornamento Agenda (Coerente con i tuoi Log)
+                    const dataParts = vecchioVoto.data.split('/');
+                    const agendaId = `${window.selectedClass}_${dataParts[2]}-${dataParts[1]}-${dataParts[0]}`;
+                    const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
             
-            const aSnap = await getDoc(agendaRef);
-            if(aSnap.exists()) {
-                let daily = aSnap.data().daily_voti || [];
-                daily = daily.map(v => 
-                    (v.studenteId === studentId && v.materia === vecchioVoto.materia && v.voto === vecchioVoto.voto) 
-                    ? { ...v, voto: nuovoVoto } : v
-                );
-                await updateDoc(agendaRef, { daily_voti: daily });
+                    const aSnap = await getDoc(agendaRef);
+                    if(aSnap.exists()) {
+                        let daily = aSnap.data().daily_voti || [];
+                        daily = daily.map(v => 
+                            (v.studenteId === studentId && v.materia === vecchioVoto.materia && v.voto === vecchioVoto.voto) 
+                            ? { ...v, voto: nuovoVoto } : v
+                        );
+                        await updateDoc(agendaRef, { daily_voti: daily });
+                    }
+            
+                    alert("Voto aggiornato con successo!");
+                    location.reload();
+                }
             }
-            
-            alert("Voto aggiornato con successo!");
-            location.reload();
-        }
-    }
-};
-
+        };
         window.deleteNote = async (idx, studentId) => {
             if(!confirm("Eliminare definitivamente questa nota? Verrà rimossa anche dall'agenda.")) return;
             const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
