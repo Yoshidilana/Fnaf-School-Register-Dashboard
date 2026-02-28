@@ -614,7 +614,7 @@
                         const notifRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global');
                         const inputElement = document.getElementById('m-txt');
                         const notaTesto = inputElement ? inputElement.value : "Motivazione non inserita";   
-                        await setDoc(notifRef, { alerts: arrayUnion({ msg: `MANDATO: ${stud.name} convocato dal Preside`, motivo: notaTesto, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), data: datascelta, autore: window.currentUserData.name }) }, { merge: true });
+                        await setDoc(notifRef, { alerts: arrayUnion({ msg: `MANDATO: ${stud.name} convocato dal Preside`, motivo: notaTesto, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), data: dataScelta, autore: window.currentUserData.name }) }, { merge: true });
                     }
                     window.closeModal();
                 };
