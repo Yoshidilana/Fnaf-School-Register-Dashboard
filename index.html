@@ -801,15 +801,15 @@
         // Recuperiamo i voti. ATTENZIONE: controlla se nel database si chiamano 'voti' o 'assignments'
         // Se nel database vedi 'assignments', cambia la riga sotto in: const listaVoti = d.data().assignments || [];
             const listaVoti = d.data().voti || []; 
-        
-        if (indiceVoto === -1) {
+    
             const indiceVoto = listaVoti.findIndex(v => v.id === votoId);
-            console.error("Errore: Voto non trovato all'indice", idx);
+            if (indiceVoto === -1) {
+            console.error("Voto non trovato con ID:", votoId);
             alert("Errore tecnico: non riesco a trovare il voto selezionato.");
             return;
         }
 
-          const vecchioVoto = { ...listaVoti[idx] };
+          const vecchioVoto = { ...listaVoti[indiceVoto] };
           const nuovoVoto = prompt("Modifica il valore del voto:", vecchioVoto.voto);
         
           if (nuovoVoto !== null && nuovoVoto !== "" && nuovoVoto !== vecchioVoto.voto) {
