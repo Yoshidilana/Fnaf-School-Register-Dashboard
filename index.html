@@ -531,7 +531,7 @@
             
             document.getElementById('input-grade-val').value = "";
             alert("Voto registrato nel profilo e in agenda!");
-            location.reload();
+            renderStudentRecords();
         };
 
         window.openModal = (type) => {
@@ -790,7 +790,7 @@ window.editNote = async (idx, studentId) => {
                 await updateDoc(agendaRef, { note: agendaNotes });
             }
             alert("Nota aggiornata!");
-            location.reload();
+            renderStudentRecords()
         }
     }
 };
@@ -835,7 +835,7 @@ window.editNote = async (idx, studentId) => {
                     }
             
                     alert("Voto aggiornato con successo!");
-                    location.reload();
+                    renderStudentRecords()
                 }
             }
         };
@@ -865,7 +865,7 @@ window.editNote = async (idx, studentId) => {
             await updateDoc(agendaRef, { note: nuoveNote });
         }
         alert("Eliminata con successo!");
-        location.reload();
+        renderStudentRecords()
     }
 };
     </script>
