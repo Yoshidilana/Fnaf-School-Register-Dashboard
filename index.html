@@ -838,7 +838,7 @@
             }
         };
         window.deleteNote = async (idx, studentId) => {
-            if(!confirm("Eliminare definitivamente questa nota? Verrà rimossa anche dall'agenda.")) return;
+            if(!confirm("Eliminare definitivamente questa nota?")) return;
             const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
             const d = await getDoc(recordRef);
             if(d.exists()) {
@@ -856,7 +856,7 @@
                 if(aSnap.exists()) {
                     let agendaNotes = aSnap.data().note || [];
                     const nuoveNote = agendaNotes.filter(n => n.id !== notaDaEliminare.id);
-                    await updateDoc(agendaRef, { assignments: nuoviAssignments });
+                    await updateDoc(agendaRef, { note: nuoveNote });
                 }
                 alert("Eliminata con successo!");
                 location.reload();
