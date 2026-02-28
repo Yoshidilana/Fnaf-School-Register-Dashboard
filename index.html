@@ -780,12 +780,12 @@
                     const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
                     const aSnap = await getDoc(agendaRef);
                     if(aSnap.exists()) {
-                        let assignments = aSnap.data().assignments || [];
-                        assignments = assignments.map(a => 
+                        let agendaNotes = aSnap.data().note || [];
+                        agendaNotes = agendaNotes.map(n =>
                             (a.studentId === studentId && a.testo === vecchiaNota.testo) 
-                            ? { ...a, testo: nuovoTesto } : a
+                            ? (n.id === vecchiaNota.id) ? { ...n, testo: nuovoTesto } : n
                         );
-                        await updateDoc(agendaRef, { assignments: assignments });
+                        await updateDoc(agendaRef, { note: agendaNotes });
                     }
                     alert("Nota aggiornata ovunque!");
                     location.reload();
@@ -854,8 +854,8 @@
                 const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
                 const aSnap = await getDoc(agendaRef);
                 if(aSnap.exists()) {
-                    let assignments = aSnap.data().assignments || [];
-                    const nuoviAssignments = assignments.filter(a => 
+                    let agendaNotes = aSnap.data().note || [];
+                    const nuoveNote = agendaNotes.filter(n => n.id !== notaDaEliminare.id);
                         !(a.studentId === studentId && a.testo === notaDaEliminare.testo)
                     );
                     await updateDoc(agendaRef, { assignments: nuoviAssignments });
