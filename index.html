@@ -500,17 +500,26 @@
         window.submitGrade = async () => {
             const v = document.getElementById('input-grade-val').value;
             const m = document.getElementById('input-grade-subject').value;
+            const arg = prompt("Inserisci l'argomento del voto (opzionale):") || "Valutazione generale";
             if(!v || !m || !window.selectedStudentId) return;
+            const inputCal = document.getElementById('global-calendar');
             const dParts = inputCal.value.split('-');
-            const dataFormattata = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+            const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+            const quadText = document.getElementById('period-indicator').innerText;
+            const quadrimestre = quadText.includes("1°") ? 1 : 2;
+            const annoScolastico = dParts[0] <= 2021 ? "2020/2021" : "2025/2026";
             const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
             const entry = { 
                 id: crypto.randomUUID(),
-                voto: v, 
-                materia: m, 
-                data: dataFormattata,
+                voto: v.toString(),
+                materia: m.toLowerCase()
+                data: dataScelta,
                 prof: window.currentUserData.name,
                 profId: window.currentUserId
+                argomento: arg,
+                quad: quadrimestre,
+                anno: annoScolastico,
+                emoji: "📝"
             };
             
             await setDoc(ref, { voti: arrayUnion(entry) }, { merge: true });
@@ -521,6 +530,8 @@
             await setDoc(agendaRef, { daily_voti: arrayUnion({ studente: window.allStudents.find(s=>s.id===window.selectedStudentId).name, studenteId: window.selectedStudentId, voto: v, materia: m }) }, { merge: true });
             
             document.getElementById('input-grade-val').value = "";
+            alert("Voto registrato nel profilo e in agenda!");
+            location.reload();
         };
 
         window.openModal = (type) => {
