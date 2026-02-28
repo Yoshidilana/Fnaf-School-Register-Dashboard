@@ -504,10 +504,12 @@
             if(!v || !m || !window.selectedStudentId) return;
             const inputCal = document.getElementById('global-calendar');
             const dParts = inputCal.value.split('-');
+            const year = parseInt(dParts[0]);
+            const month = parseInt(dParts[1]);
             const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
             const quadText = document.getElementById('period-indicator').innerText;
             const quadrimestre = quadText.includes("1°") ? 1 : 2;
-            const annoScolastico = dParts[0] <= 2021 ? "2020/2021" : "2025/2026";
+            const annoScolastico = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
             const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
             const entry = { 
                 id: crypto.randomUUID(),
@@ -531,7 +533,7 @@
             
             document.getElementById('input-grade-val').value = "";
             alert("Voto registrato nel profilo e in agenda!");
-            renderStudentRecords();
+            loadStudentRecords(window.selectedStudentId);
         };
 
         window.openModal = (type) => {
@@ -790,7 +792,7 @@ window.editNote = async (idx, studentId) => {
                 await updateDoc(agendaRef, { note: agendaNotes });
             }
             alert("Nota aggiornata!");
-            renderStudentRecords()
+            loadStudentRecords(studentId);
         }
     }
 };
@@ -835,7 +837,7 @@ window.editNote = async (idx, studentId) => {
                     }
             
                     alert("Voto aggiornato con successo!");
-                    renderStudentRecords()
+                    loadStudentRecords(studentId);
                 }
             }
         };
@@ -865,7 +867,7 @@ window.editNote = async (idx, studentId) => {
             await updateDoc(agendaRef, { note: nuoveNote });
         }
         alert("Eliminata con successo!");
-        renderStudentRecords()
+        loadStudentRecords(studentId);
     }
 };
     </script>
