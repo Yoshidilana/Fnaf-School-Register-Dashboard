@@ -618,8 +618,14 @@
                 };
             }
         };
-
-        // --- NOTIFICHE ---
+         // --- NOTIFICHE ---
+        window.toggleNotifPanel = () => {
+        const panel = document.getElementById('notif-panel');
+        if (!panel) return;
+        if (window.userRole !== ROLES.PRESIDE && window.userRole !== ROLES.VICE_PRESIDE) return;
+        panel.classList.toggle('hidden');
+    };
+       
        function listenNotifications() {
     onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global'), d => {
         if(d.exists()) {
