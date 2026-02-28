@@ -693,8 +693,12 @@
         window.addBacheca = async () => {
             const txt = document.getElementById('input-bacheca-text').value;
             if(!txt) return;
+            const inputCal = document.getElementById('global-calendar');
+            const dParts = inputCal.value.split('-');
+            const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+            const oraAttuale = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
             const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'bulletin', 'general');
-            await setDoc(ref, { posts: arrayUnion({ text: txt, author: window.currentUserData.name, date: new Date().toLocaleString('it-IT') }) }, { merge: true });
+            await setDoc(ref, { posts: arrayUnion({ text: txt, author: window.currentUserData.name, date: date: `${dataScelta} — ${oraAttuale}` }) }, { merge: true });
             document.getElementById('input-bacheca-text').value = "";
         }
 
