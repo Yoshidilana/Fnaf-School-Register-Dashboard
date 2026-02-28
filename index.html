@@ -793,33 +793,32 @@
             }
         };
 
-        window.editVoto = async (idx, studentId) => {
-            const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
-            const d = await getDoc(recordRef);
-
-            if(d.exists()) {
-        // Recuperiamo i voti. ATTENZIONE: controlla se nel database si chiamano 'voti' o 'assignments'
-        // Se nel database vedi 'assignments', cambia la riga sotto in: const listaVoti = d.data().assignments || [];
-            const listaVoti = d.data().voti || []; 
+        window.editVoto = async (idRicevuto, studentId) => { // <--- Lo chiamiamo idRicevuto
+           const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+           const d = await getDoc(recordRef);
     
-            const indiceVoto = listaVoti.findIndex(v => v.id === votoId);
-            if (indiceVoto === -1) {
-            console.error("Voto non trovato con ID:", votoId);
-            alert("Errore tecnico: non riesco a trovare il voto selezionato.");
+           if(d.exists()) {
+           const listaVoti = d.data().voti || []; 
+        
+        // Cerchiamo l'elemento che ha l'ID uguale a quello ricevuto dal pulsante
+            const indiceVoto = listaVoti.findIndex(v => v.id === idRicevuto);
+        
+          if (indiceVoto === -1) {
+            console.error("Voto non trovato con ID:", idRicevuto);
+            alert("Errore: Impossibile trovare questo voto.");
             return;
         }
 
-          const vecchioVoto = { ...listaVoti[indiceVoto] };
-          const nuovoVoto = prompt("Modifica il valore del voto:", vecchioVoto.voto);
+         const vecchioVoto = { ...listaVoti[indiceVoto] };
+         const nuovoVoto = prompt("Modifica il valore del voto:", vecchioVoto.voto);
         
-          if (nuovoVoto !== null && nuovoVoto !== "" && nuovoVoto !== vecchioVoto.voto) {
+         if (nuovoVoto !== null && nuovoVoto !== "" && nuovoVoto !== vecchioVoto.voto) {
             // 1. Aggiorna Profilo Studente
-            listaVoti[idx].voto = nuovoVoto;
-            await updateDoc(recordRef, { voti: listaVoti }); // Cambia in 'assignments: listaVoti' se necessario
+            listaVoti[indiceVoto].voto = nuovoVoto;
+            await updateDoc(recordRef, { voti: listaVoti });
 
-            // 2. Aggiorna Agenda Globale (usando la tua struttura 'agendas' e 'daily_voti')
-            // Ricostruiamo l'ID agenda come abbiamo fatto per il salvataggio
-            const dataParts = vecchioVoto.data.split('/'); // DD/MM/YYYY
+            // 2. Aggiorna Agenda Globale
+            const dataParts = vecchioVoto.data.split('/');
             const agendaId = `${window.selectedClass}_${dataParts[2]}-${dataParts[1]}-${dataParts[0]}`;
             const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
             
