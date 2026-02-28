@@ -802,7 +802,8 @@
         // Se nel database vedi 'assignments', cambia la riga sotto in: const listaVoti = d.data().assignments || [];
             const listaVoti = d.data().voti || []; 
         
-        if (!listaVoti[idx]) {
+        if (indiceVoto === -1) {
+            const indiceVoto = listaVoti.findIndex(v => v.id === votoId);
             console.error("Errore: Voto non trovato all'indice", idx);
             alert("Errore tecnico: non riesco a trovare il voto selezionato.");
             return;
