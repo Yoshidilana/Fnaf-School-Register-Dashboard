@@ -612,7 +612,8 @@
                         // Notifica al Preside (se emesso da altri, ma qui è solo preside)
                         // Invia record notifica a tutti i prof
                         const notifRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global');
-                        const notaTesto = document.getElementById('m-txt').value;    
+                        const inputElement = document.getElementById('m-txt');
+                        const notaTesto = inputElement ? inputElement.value : "Motivazione non inserita";   
                         await setDoc(notifRef, { alerts: arrayUnion({ msg: `MANDATO: ${stud.name} convocato dal Preside`, motivo: notaTesto, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), data: new Date().toLocaleDateString(), autore: window.currentUserData.name }) }, { merge: true });
                     }
                     window.closeModal();
