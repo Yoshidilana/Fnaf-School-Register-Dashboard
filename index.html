@@ -796,33 +796,47 @@
         window.editVoto = async (idx, studentId) => {
             const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
             const d = await getDoc(recordRef);
-            if(d.exists()) {
-                const voti = d.data().voti || [];
-                const vecchioVoto = { ...voti[idx] };
-                const nuovoVoto = prompt("Modifica il valore del voto:", vecchioVoto.voto);
-                
-                if (nuovoVoto !== null && nuovoVoto !== "" && nuovoVoto !== vecchioVoto.voto) {
-                    // 1. Aggiorna Profilo Studente
-                    voti[idx].voto = nuovoVoto;
-                    await updateDoc(recordRef, { voti: voti });
 
-                    // 2. Aggiorna Agenda Globale
-                    const agendaId = vecchioVoto.data.split('/').reverse().join('');
-                    const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agenda', agendaId);
-                    const aSnap = await getDoc(agendaRef);
-                    if(aSnap.exists()) {
-                        let assignments = aSnap.data().assignments || [];
-                        assignments = assignments.map(a => 
-                            (a.studentId === studentId && a.materia === vecchioVoto.materia && a.voto === vecchioVoto.voto) 
-                            ? { ...a, voto: nuovoVoto } : a
-                        );
-                        await updateDoc(agendaRef, { assignments: assignments });
-                    }
-                    alert("Voto aggiornato ovunque!");
-                    location.reload();
-                }
+            if(d.exists()) {
+        // Recuperiamo i voti. ATTENZIONE: controlla se nel database si chiamano 'voti' o 'assignments'
+        // Se nel database vedi 'assignments', cambia la riga sotto in: const listaVoti = d.data().assignments || [];
+            const listaVoti = d.data().voti || []; 
+        
+        if (!listaVoti[idx]) {
+            console.error("Errore: Voto non trovato all'indice", idx);
+            alert("Errore tecnico: non riesco a trovare il voto selezionato.");
+            return;
+        }
+
+          const vecchioVoto = { ...listaVoti[idx] };
+          const nuovoVoto = prompt("Modifica il valore del voto:", vecchioVoto.voto);
+        
+          if (nuovoVoto !== null && nuovoVoto !== "" && nuovoVoto !== vecchioVoto.voto) {
+            // 1. Aggiorna Profilo Studente
+            listaVoti[idx].voto = nuovoVoto;
+            await updateDoc(recordRef, { voti: listaVoti }); // Cambia in 'assignments: listaVoti' se necessario
+
+            // 2. Aggiorna Agenda Globale (usando la tua struttura 'agendas' e 'daily_voti')
+            // Ricostruiamo l'ID agenda come abbiamo fatto per il salvataggio
+            const dataParts = vecchioVoto.data.split('/'); // DD/MM/YYYY
+            const agendaId = `${window.selectedClass}_${dataParts[2]}-${dataParts[1]}-${dataParts[0]}`;
+            const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+            
+            const aSnap = await getDoc(agendaRef);
+            if(aSnap.exists()) {
+                let daily = aSnap.data().daily_voti || [];
+                daily = daily.map(v => 
+                    (v.studenteId === studentId && v.materia === vecchioVoto.materia && v.voto === vecchioVoto.voto) 
+                    ? { ...v, voto: nuovoVoto } : v
+                );
+                await updateDoc(agendaRef, { daily_voti: daily });
             }
-        };
+            
+            alert("Voto aggiornato con successo!");
+            location.reload();
+        }
+    }
+};
 
         window.deleteNote = async (idx, studentId) => {
             if(!confirm("Eliminare definitivamente questa nota? Verrà rimossa anche dall'agenda.")) return;
