@@ -288,6 +288,8 @@
             document.getElementById('period-indicator').innerText = (month >= 9 || month <= 1) ? "1° Quadrimestre" : "2° Quadrimestre";
             if(window.selectedClass) window.handleClassChange();
             if(window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
+            if(document.getElementById('pagella-anno-scolastico')) {
+            document.getElementById('pagella-anno-scolastico').innerText = `Pagelle ${document.getElementById('current-academic-year').innerText}`;}
         };
         window.updateDateContext();
 
@@ -400,7 +402,8 @@
             const month = date.getMonth() + 1;
             const year = date.getFullYear();
             const ay = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
-            document.getElementById('pagella-anno-scolastico').innerText = `Pagelle A.S. ${ay}`;
+            const annoAttuale = document.getElementById('current-academic-year').innerText;
+            ddocument.getElementById('pagella-anno-scolastico').innerText = `Pagelle ${annoAttuale}`;
             }
             loadStudentRecords(id);
         };
