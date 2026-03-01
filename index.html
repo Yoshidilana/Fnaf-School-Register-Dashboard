@@ -398,6 +398,8 @@
                 }).map(v => v.materia.toLowerCase().trim()))];
 
                 let vHtml = "";
+                let sommaGlobal = 0;
+                let conteggioGlobal = 0;
                 
                 materie.forEach(m => {
                     const m_voti = voti.filter(v => {
@@ -411,7 +413,10 @@
                     }); 
                     const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
                     const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
-                    const avg = m_voti.length ? (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1) : "0.0";
+                    const sommaMateria = m_voti.reduce((a, b) => a + parseFloat(b.voto), 0);
+                    const avg = m_voti.length ? (sommaMateria / m_voti.length).toFixed(1) : "0.0";
+                        if(m_voti.length > 0) {sommaGlobal += sommaMateria; conteggioGlobal += m_voti.length;
+                        }
                     
                     vHtml += `<tr>
                         <td class="p-4 font-bold text-red-800 uppercase">${m}</td>
@@ -420,6 +425,8 @@
                         <td class="p-4 text-right font-black text-lg">${avg}</td>
                     </tr>`;
                     document.getElementById('registro-voti-body').innerHTML = vHtml || `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Nessun voto per l'A.S. ${aySelezionato}</td></tr>`;
+                    const mediaAnnoVisualizzato = conteggioGlobal > 0 ? (sommaGlobal / conteggioGlobal).toFixed(1) : "0.0";
+                    document.getElementById('res-student-media').innerText = mediaAnnoVisualizzato;
                 });
 
                 // Sezione Voti Globali per Prof/Preside
