@@ -506,10 +506,12 @@
             const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
             const mediaMateria = (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1);
 
-            vHtml += `<tr class="opacity-60">
-                <td class="p-2 pl-4 font-bold uppercase">${m}</td>
-                <td class="p-2" colspan="2">${m_voti.map(v => `<span class="mr-1">${v.voto}</span>`).join('')}</td>
-                <td class="p-2 text-right font-bold text-black">${mediaMateria}</td>
+            vHtml += `<tr class="opacity-60 bg-zinc-50/50">
+                <td class="p-2 pl-4 font-bold uppercase italic text-zinc-500">${m}</td>
+                <td class="p-2 pl-4 font-bold uppercase italic text-zinc-500">${m}</td>
+                <td class="p-2">${q1.map(v => `<span class="mr-1 font-medium">${v.voto}</span>`).join('')}</td>
+                <td class="p-2">${q2.map(v => `<span class="mr-1 font-medium">${v.voto}</span>`).join('')}</td>
+                <td class="p-2 text-right font-black text-zinc-400">${mediaMateria}</td>
             </tr>`;
         });
     }
