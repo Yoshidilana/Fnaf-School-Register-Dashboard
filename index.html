@@ -551,13 +551,13 @@
             const canEdit = isProf || isPreside;
             const colorClass = v.voto < 6 ? 'text-red-500 font-bold' : 'text-zinc-800';
             const hoverClass = canEdit ? 'hover:bg-zinc-200' : '';
-            if (v.argomento) tooltipText += `\nArgomento: ${v.argomento}`;
-            const tooltipText = `Data: ${v.data}${v.commento ? ' - Nota: ' + v.commento : ''}`;
+            if (v.argomento) {tooltipText += `\nArgomento: ${v.argomento}`;
+            let tooltipText = `Data: ${v.data}${v.commento ? ' - Nota: ' + v.commento : ''}`;
             let onclickHandler = "";
             if (canEdit) {
             onclickHandler = `window.editVoto('${v.id}', '${studentId}')`;
             }
-            return `<span title="${tooltipText}"class="mr-1 inline-block px-1 rounded cursor-help ${colorClass} ${hoverClass}"onclick="${onclickHandler}">${v.voto}</span>`;
+            return `<span title="${tooltipText}" class="mr-1 inline-block px-1 rounded cursor-help ${colorClass} ${hoverClass}" onclick="${onclickHandler}">${v.voto}</span>`;
         }
 
         function renderNoteActions(n, idx, studentId) {
