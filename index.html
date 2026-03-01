@@ -396,11 +396,11 @@
             document.getElementById('res-student-role').innerText = student.role;
             if(document.getElementById('pagella-student-name')) {
             document.getElementById('pagella-student-name').innerText = student.name;
-            const dataSelezionata = new Date(window.currentDate);
-            const anno = dataSelezionata.getFullYear();
-            const mese = dataSelezionata.getMonth();
-            let annoScelto = mese < 8 ? `${anno-1}/${anno}` : `${anno}/${anno+1}`;
-            document.getElementById('pagella-anno-scolastico').innerText = `Pagelle A.S. ${annoScelto}`;
+            const date = new Date(inputCal.value);
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+            const ay = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+            document.getElementById('pagella-anno-scolastico').innerText = `Pagelle A.S. ${ay}`;
             }
             loadStudentRecords(id);
         };
@@ -991,14 +991,14 @@ window.editNote = async (idx, studentId) => {
         q1Html += `
             <tr class="hover:bg-zinc-50 transition-colors">
                 <td class="p-4 font-bold uppercase text-zinc-800">${m}</td>
-                <td class="p-4 text-center font-black text-lg ${parseFloat(avgQ1) < 6 ? 'text-red-600' : 'text-zinc-900'}">${Math.round(parseFloat(avgQ1))}</td>
+                <td class="p-4 text-center font-black text-lg ${Math.round(parseFloat(avgQ1)) < 6 ? 'text-red-600' : 'text-zinc-900'}">${Math.round(parseFloat(avgQ1))}</td>
                 <td class="p-4 text-right">${getEsito(avgQ1)}</td>
             </tr>`;
 
         q2Html += `
             <tr class="hover:bg-zinc-50 transition-colors">
                 <td class="p-4 font-bold uppercase text-zinc-800">${m}</td>
-                <td class="p-4 text-center font-black text-lg ${parseFloat(avgQ2) < 6 ? 'text-red-600' : 'text-zinc-900'}">${Math.round(parseFloat(avgQ2))}</td>
+                <td class="p-4 text-center font-black text-lg ${Math.round(parseFloat(avgQ2)) < 6 ? 'text-red-600' : 'text-zinc-900'}">${Math.round(parseFloat(avgQ2))}</td>
                 <td class="p-4 text-right">${getEsito(avgQ2)}</td>
             </tr>`;
     });
