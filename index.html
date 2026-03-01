@@ -403,7 +403,7 @@
             const year = date.getFullYear();
             const ay = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
             const annoAttuale = document.getElementById('current-academic-year').innerText;
-            ddocument.getElementById('pagella-anno-scolastico').innerText = `Pagelle ${annoAttuale}`;
+            document.getElementById('pagella-anno-scolastico').innerText = `Pagelle ${annoAttuale}`;
             }
             loadStudentRecords(id);
         };
