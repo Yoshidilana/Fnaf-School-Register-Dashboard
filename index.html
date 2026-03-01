@@ -986,14 +986,14 @@ window.editNote = async (idx, studentId) => {
         q1Html += `
             <tr class="hover:bg-zinc-50 transition-colors">
                 <td class="p-4 font-bold uppercase text-zinc-800">${m}</td>
-                <td class="p-4 text-center font-black text-lg ${parseFloat(avgQ1) < 6 ? 'text-red-600' : 'text-zinc-900'}">${avgQ1}</td>
+                <td class="p-4 text-center font-black text-lg ${parseFloat(avgQ1) < 6 ? 'text-red-600' : 'text-zinc-900'}">${Math.round(parseFloat(avgQ1))}</td>
                 <td class="p-4 text-right">${getEsito(avgQ1)}</td>
             </tr>`;
 
         q2Html += `
             <tr class="hover:bg-zinc-50 transition-colors">
                 <td class="p-4 font-bold uppercase text-zinc-800">${m}</td>
-                <td class="p-4 text-center font-black text-lg ${parseFloat(avgQ2) < 6 ? 'text-red-600' : 'text-zinc-900'}">${avgQ2}</td>
+                <td class="p-4 text-center font-black text-lg ${parseFloat(avgQ2) < 6 ? 'text-red-600' : 'text-zinc-900'}">${Math.round(parseFloat(avgQ2))}</td>
                 <td class="p-4 text-right">${getEsito(avgQ2)}</td>
             </tr>`;
     });
