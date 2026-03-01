@@ -64,6 +64,11 @@
                 <button onclick="window.changeMenu('registro')" id="menu-registro" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-200">
                     <span>📝</span> Registro Voti
                 </button>
+
+                <button onclick="window.changeMenu('pagella')" id="menu-pagella" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-200">
+                    <span>🎓</span> Pagella Scolastica
+                </button>
+                
                 <button onclick="window.changeMenu('note')" id="menu-note" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-200">
                     <span>⚠️</span> Note e Mandati
                 </button>
@@ -175,6 +180,51 @@
                     <button onclick="window.addBacheca()" class="bg-zinc-100 text-black px-4 py-2 rounded text-[10px] font-black uppercase">Pubblica</button>
                 </div>
                 <div id="bacheca-container" class="space-y-3 overflow-y-auto"></div>
+            </div>
+
+            <!-- VIEW: Pagella -->
+            <div id="view-pagella" class="tab-content space-y-6">
+                <div class="glass p-6 rounded-2xl flex justify-between items-center border-l-4 border-red-600">
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-red-500 tracking-widest mb-1">Scrutinio Finale</p>
+                        <h2 id="pagella-student-name" class="text-3xl font-black uppercase italic text-amber-200 tracking-tight">Seleziona Studente</h2>
+                    </div>
+                    <div class="text-right">
+                        <button onclick="window.print()" class="bg-white text-black text-[9px] font-black px-4 py-2 rounded uppercase hover:bg-zinc-200 transition-all">Stampa Documento</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
+                        <div class="bg-zinc-800 p-3 text-white text-[10px] font-black uppercase tracking-widest text-center italic">Risultati 1° Quadrimestre</div>
+                        <table class="w-full text-left text-[11px]">
+                            <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-black uppercase">
+                                <tr>
+                                    <th class="p-4">Insegnamento</th>
+                                    <th class="p-4 text-center">Media</th>
+                                    <th class="p-4 text-right">Esito</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pagella-q1-body" class="divide-y divide-zinc-100 text-zinc-700">
+                                </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
+                        <div class="bg-red-700 p-3 text-white text-[10px] font-black uppercase tracking-widest text-center italic">Risultati 2° Quadrimestre</div>
+                        <table class="w-full text-left text-[11px]">
+                            <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-black uppercase">
+                                <tr>
+                                    <th class="p-4">Insegnamento</th>
+                                    <th class="p-4 text-center">Media</th>
+                                    <th class="p-4 text-right">Esito</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pagella-q2-body" class="divide-y divide-zinc-100 text-zinc-700">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <!-- MODAL -->
@@ -344,6 +394,9 @@
             document.getElementById('student-header').classList.remove('hidden');
             document.getElementById('res-student-name').innerText = student.name;
             document.getElementById('res-student-role').innerText = student.role;
+            if(document.getElementById('pagella-student-name')) {
+            document.getElementById('pagella-student-name').innerText = student.name;
+            }
             loadStudentRecords(id);
         };
 
@@ -393,13 +446,19 @@
                 if(!vAy && v.data) {
                const p = v.data.split('/');
                vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
-               }
+             }
                return vAy === aySelezionato;
               });
                  const sommaG = votiTuttoAnno.reduce((a, b) => a + parseFloat(b.voto), 0);
                  const mediaG = votiTuttoAnno.length > 0 ? (sommaG / votiTuttoAnno.length).toFixed(1) : "0.0";
-                 if(document.getElementById('res-student-media')) { document.getElementById('res-student-media').innerText = mediaG;
+                 if(document.getElementById('res-student-media')) { 
+                document.getElementById('res-student-media').innerText = mediaG;
+                 }                                                  
+                 if(document.getElementById('pagella-student-name')) {
+                 const student = window.allStudents.find(s => s.id === studentId);
+                 document.getElementById('pagella-student-name').innerText = student ? student.name : "Studente";
                  }
+                  window.renderPagella(voti, aySelezionato);                                                 
                  const materie = (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) ? (window.currentUserData.materie || [])  : [...new Set(votiTuttoAnno.map(v => v.materia.toLowerCase().trim()))];
 
                 let vHtml = "";
@@ -883,6 +942,58 @@ window.editNote = async (idx, studentId) => {
         alert("Eliminata con successo!");
         loadStudentRecords(studentId);
     }
+};
+        window.renderPagella = (voti, aySelezionato) => {
+    const q1Body = document.getElementById('pagella-q1-body');
+    const q2Body = document.getElementById('pagella-q2-body');
+    if (!q1Body || !q2Body) return;
+
+    // Filtriamo i voti dell'anno selezionato (logica identica al registro)
+    const votiAnno = voti.filter(v => {
+        let vAy = v.anno;
+        if(!vAy && v.data) {
+            const p = v.data.split('/');
+            vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
+        }
+        return vAy === aySelezionato;
+    });
+
+    // Prendiamo le materie uniche
+    const materie = [...new Set(votiAnno.map(v => v.materia.toLowerCase().trim()))];
+    
+    let q1Html = "";
+    let q2Html = "";
+
+    materie.forEach(m => {
+        const m_voti = votiAnno.filter(v => v.materia.toLowerCase().trim() === m);
+        
+        // Calcolo Medie per Quadrimestre
+        const vQ1 = m_voti.filter(v => isDateInQ(v.data, 1));
+        const vQ2 = m_voti.filter(v => isDateInQ(v.data, 2));
+
+        const avgQ1 = vQ1.length ? (vQ1.reduce((a,b)=>a+parseFloat(b.voto),0)/vQ1.length).toFixed(1) : "-";
+        const avgQ2 = vQ2.length ? (vQ2.reduce((a,b)=>a+parseFloat(b.voto),0)/vQ2.length).toFixed(1) : "-";
+
+        // Funzione rapida per l'icona esito
+        const getEsito = (avg) => avg === "-" ? "" : (parseFloat(avg) >= 6 ? "✅" : "❌");
+
+        q1Html += `
+            <tr class="hover:bg-zinc-50 transition-colors">
+                <td class="p-4 font-bold uppercase text-zinc-800">${m}</td>
+                <td class="p-4 text-center font-black text-lg ${parseFloat(avgQ1) < 6 ? 'text-red-600' : 'text-zinc-900'}">${avgQ1}</td>
+                <td class="p-4 text-right">${getEsito(avgQ1)}</td>
+            </tr>`;
+
+        q2Html += `
+            <tr class="hover:bg-zinc-50 transition-colors">
+                <td class="p-4 font-bold uppercase text-zinc-800">${m}</td>
+                <td class="p-4 text-center font-black text-lg ${parseFloat(avgQ2) < 6 ? 'text-red-600' : 'text-zinc-900'}">${avgQ2}</td>
+                <td class="p-4 text-right">${getEsito(avgQ2)}</td>
+            </tr>`;
+    });
+
+    q1Body.innerHTML = q1Html || '<tr><td colspan="3" class="p-8 text-center italic text-zinc-400">Nessun voto nel 1° Quadrimestre</td></tr>';
+    q2Body.innerHTML = q2Html || '<tr><td colspan="3" class="p-8 text-center italic text-zinc-400">Nessun voto nel 2° Quadrimestre</td></tr>';
 };
     </script>
 </body>
