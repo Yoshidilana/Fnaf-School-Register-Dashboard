@@ -388,36 +388,27 @@
                 const dateVal = new Date(inputCal.value);
                 const yearVal = dateVal.getFullYear();
                 const aySelezionato = (dateVal.getMonth() + 1) >= 9 ? `${yearVal}/${yearVal + 1}` : `${yearVal - 1}/${yearVal}`;
-                const votiTuttoAnno = voti.filter(v=> {
-                const materie = (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) ? (window.currentUserData.materie || []) : [...new Set(voti.filter(v => {
+                const votiTuttoAnno = voti.filter(v => {
                 let vAy = v.anno;
                 if(!vAy && v.data) {
-                const p = v.data.split('/');
-                vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
-                }
-                return vAy === aySelezionato;
-                }).map(v => v.materia.toLowerCase().trim()))];
+               const p = v.data.split('/');
+               vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
+               }
+               return vAy === aySelezionato;
+              });
                  const sommaG = votiTuttoAnno.reduce((a, b) => a + parseFloat(b.voto), 0);
                  const mediaG = votiTuttoAnno.length > 0 ? (sommaG / votiTuttoAnno.length).toFixed(1) : "0.0";
                  if(document.getElementById('res-student-media')) { document.getElementById('res-student-media').innerText = mediaG;
+                 }
                  const materie = (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) ? (window.currentUserData.materie || [])  : [...new Set(votiTuttoAnno.map(v => v.materia.toLowerCase().trim()))];
 
                 let vHtml = "";
                 
                 materie.forEach(m => {
                     const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
-                    if (v.materia.toLowerCase().trim() !== m.toLowerCase().trim()) return false;
-                    let vAy = v.anno;
-                    if (!vAy && v.data) {
-                    const p = v.data.split('/');
-                    vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
-                    }
-                    return vAy === aySelezionato;
-                    }); 
                     const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
                     const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
                     const avg = m_voti.length ? (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1) : "0.0";
-                   }
                     
                     vHtml += `<tr>
                         <td class="p-4 font-bold text-red-800 uppercase">${m}</td>
@@ -425,7 +416,7 @@
                         <td class="p-4">${q2.map(v => renderVotoTag(v, studentId)).join('')}</td>
                         <td class="p-4 text-right font-black text-lg">${avg}</td>
                     </tr>`;
-                     );
+                    });
                     document.getElementById('registro-voti-body').innerHTML = vHtml || `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Nessun voto per l'A.S. ${aySelezionato}</td></tr>`;
 
                 // Sezione Voti Globali per Prof/Preside
