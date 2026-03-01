@@ -981,7 +981,7 @@ window.editNote = async (idx, studentId) => {
         const avgQ2 = vQ2.length ? (vQ2.reduce((a,b)=>a+parseFloat(b.voto),0)/vQ2.length).toFixed(1) : "-";
 
         // Funzione rapida per l'icona esito
-        const getEsito = (avg) => avg === "-" ? "" : (parseFloat(avg) >= 6 ? "✅" : "❌");
+        const getEsito = (avg) => avg === "-" ? "" : Math.round(parseFloat(avg)) >= 6 ? "✅" : "❌";
 
         q1Html += `
             <tr class="hover:bg-zinc-50 transition-colors">
