@@ -551,6 +551,7 @@
             const canEdit = isProf || isPreside;
             const colorClass = v.voto < 6 ? 'text-red-500 font-bold' : 'text-zinc-800';
             const hoverClass = canEdit ? 'hover:bg-zinc-200' : '';
+            const infoArgomento = v.argomento ? `\nArgomento: ${v.argomento}` : "";
             const tooltipText = `Data: ${v.data}${v.commento ? ' - Nota: ' + v.commento : ''}`;
             let onclickHandler = "";
             if (canEdit) {
