@@ -553,6 +553,7 @@
             const hoverClass = canEdit ? 'hover:bg-zinc-200' : '';
             let tooltipText = `Data: ${v.data}${v.commento ? ' - Nota: ' + v.commento : ''}`;
             if (v.argomento) {tooltipText += `\nArgomento: ${v.argomento}`;
+            }
             let onclickHandler = "";
             if (canEdit) {
             onclickHandler = `window.editVoto('${v.id}', '${studentId}')`;
