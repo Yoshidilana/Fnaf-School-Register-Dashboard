@@ -502,6 +502,8 @@
         altreMaterie.forEach(m => {
             // Calcoliamo la media solo sui voti dell'anno corrente per questa materia
             const m_voti = votiAnnoCorrente.filter(v => v.materia.toLowerCase().trim() === m);
+            const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
+            const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
             const mediaMateria = (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1);
 
             vHtml += `<tr class="opacity-60">
